@@ -1,2 +1,2 @@
-a = list(range(0, 4))
-print(a)
+import os
+print(os.__file__)

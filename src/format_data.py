@@ -164,10 +164,10 @@ def format(file):
 def printf_data(data_format, index_file, data_file):
     index = open(index_file, 'w')
     out = open(data_file, 'w')
-    index_output = ''
-    out_output = ''
-    index_output += ':'.join(list(data_format.keys()))
-    # print(':'.join(list(data_format.keys())), file=index)
+    # index_output = ''
+    # out_output = ''
+    # index_output += ':'.join(list(data_format.keys()))
+    print(':'.join(list(data_format.keys())), file=index)
     # idx = 0
     # for line_key in data_format.keys():
     #     length = len(list(data_format[line_key])) - 1
@@ -177,9 +177,11 @@ def printf_data(data_format, index_file, data_file):
     #     print(col_range, end=',', file=index)
     # print('', file=index)
     idx = 0
+    init = 0
     for line_key in data_format.keys():
         # index_output += ':'.join(list(data_format[line_key].keys())[1:])
         print(':'.join(list(data_format[line_key].keys())[1:]), file=index)
+        print(init, end=',', file=index)
         for col_key in list(data_format[line_key].keys())[1:]:
             cout = data_format[line_key][col_key]
             cout = list(map(lambda x: ':'.join(list(map(str, x))), cout))
@@ -191,6 +193,7 @@ def printf_data(data_format, index_file, data_file):
             # index_output += str(idx) + ','
             print(idx, end=',', file=index)
         # index_output += '\n'
+        init = idx
         print('', file=index)
     # index.write(index_output)
     # out.write(out_output)

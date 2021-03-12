@@ -181,8 +181,10 @@ def printf_data(data_format, index_file, data_file):
     out = open(data_file, 'w')
     print(':'.join(list(data_format.keys())), file=index)
     idx = 0
+    init = 0
     for line_key in data_format.keys():
         print(':'.join(list(data_format[line_key].keys())[1:]), file=index)
+        print(init, end=',', file=index)
         for col_key in list(data_format[line_key].keys())[1:]:
             cout = data_format[line_key][col_key]
             cout = list(map(lambda x: ':'.join(list(map(str, x))), cout))
@@ -191,6 +193,7 @@ def printf_data(data_format, index_file, data_file):
                 bits = len(item.encode()) + 1
                 idx += bits
             print(idx, end=',', file=index)
+        init = idx
         print('', file=index)
 
 
