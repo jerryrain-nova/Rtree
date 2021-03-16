@@ -46,6 +46,7 @@ def get_search_target(lower, upper, index_list):
 
 def search_data_range(index_file, target):
     index = open(index_file, 'r')
+    index.readline()
     line_index = list(map(int, index.readline().strip().split(':')))
     line_lower, line_upper, col_lower, col_upper = input_info(target)
     line_idx_range = get_search_target(line_lower, line_upper, line_index)

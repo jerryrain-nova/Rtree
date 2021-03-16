@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import time
-from site import load_data
+from src import load_data
 
 
 def line_cut(data_dict):
@@ -31,7 +31,6 @@ def line_cut(data_dict):
         key = str(init_idx) + ':' + str(line_idx)
         data_format[key] = block
         data_format['each_stat'][key] = num
-
     return data_format
 
 
@@ -144,12 +143,13 @@ def format(file):
     data_dict = load_data.load(file)
     data_by_line = line_cut(data_dict)
     data_format = {}
+    data_format['size'] = data_dict['size']
     length_list = []
     # key = list(data_by_line.keys())[7]
     # print("key = ", key)
     # data_df = trans_dataframe(data_by_line[key], data_by_line['each_stat'][key])
     # column_cut_block(data_df)
-    for key in list(data_by_line.keys())[1:]:
+    for key in list(data_by_line.keys())[2:]:
         # print("key = ", key)
         data_df = trans_dataframe(data_by_line[key], data_by_line['each_stat'][key])
         data_by_column = column_cut_block(data_df)
@@ -167,7 +167,8 @@ def printf_data(data_format, index_file, data_file):
     # index_output = ''
     # out_output = ''
     # index_output += ':'.join(list(data_format.keys()))
-    print(':'.join(list(data_format.keys())), file=index)
+    print(','.join(list(map(str, data_format['size']))), file=index)
+    print(':'.join(list(data_format.keys())[1:]), file=index)
     # idx = 0
     # for line_key in data_format.keys():
     #     length = len(list(data_format[line_key])) - 1
@@ -178,7 +179,7 @@ def printf_data(data_format, index_file, data_file):
     # print('', file=index)
     idx = 0
     init = 0
-    for line_key in data_format.keys():
+    for line_key in list(data_format.keys())[1:]:
         # index_output += ':'.join(list(data_format[line_key].keys())[1:])
         print(':'.join(list(data_format[line_key].keys())[1:]), file=index)
         print(init, end=',', file=index)
