@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from src import load_data
+from site import load_data
 
 
 def line_cut(data_dict):
