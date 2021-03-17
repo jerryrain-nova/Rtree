@@ -10,7 +10,7 @@ def load(file):
         Input.readline()
         line_count = 0
         line_list = []
-        data_dict = {'each_stat': [[], []], 'size':[]}
+        data_dict = {'each_stat': [[], []], 'size': []}
         stat = False
         for line in Input:
             [gene, x, y, value] = line.strip().split('\t')
@@ -39,18 +39,10 @@ def load(file):
     fill_zero(line_idx, int(y), data_dict)
     data_dict['each_stat'][0].append(line_count)
     data_dict['each_stat'][1].append(int(y))
-    data_dict['size'] = [max_x, max_y]
+    data_dict['size'] = [max_x+1, max_y+1]
 
     return data_dict
-    # for key in data_dict.keys():
-    #     print(key, end=',')
-    # print('')
-    # zero = []
-    # for idx in range(len(data_dict['each_stat'])):
-    #     if data_dict['each_stat'][idx] == 0:
-    #         zero.append(idx)
-    # print(zero)
-    # print("num = ", len(zero))
+
 
 if __name__ == '__main__':
     file = "C:/Users/chenyujie/Desktop/Test/spatial_loadtest.txt"
