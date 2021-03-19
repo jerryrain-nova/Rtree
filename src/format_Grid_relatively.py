@@ -37,7 +37,6 @@ def format_grid(data, grid_size):
 
 def printf_data(index_file, data_file, info_dict, data_grid):
     x, y, size = info_dict['info']
-    
 
 
 def main(raw_file, index_file, data_file, grid_size):
