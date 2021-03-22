@@ -1,5 +1,4 @@
 import time
-import math
 
 
 def extremum(x, y, min_x, min_y, max_x, max_y):
@@ -48,10 +47,11 @@ def format_data(data_file, data_info):
     min_x, min_y, max_x, max_y, grid_size = data_info['info']
     last_col_range = list(range(max_x+1-grid_size, max_x))
     last_line_range = list(range(max_y+1-grid_size, max_y))
-    last_colMBR_idx = math.ceil((max_x-min_x+1)/grid_size)
-    last_lineMBR_idx = math.ceil((max_y-min_y+1)/grid_size)
-    data_stat = {'col': [0] * last_colMBR_idx, 'line': [0] * last_lineMBR_idx}
+    last_colMBR_idx = int((max_x-min_x)/grid_size)
+    last_lineMBR_idx = int((max_y-min_y)/grid_size)
+    data_stat = {'col': [0] * (last_colMBR_idx+1), 'line': [0] * (last_lineMBR_idx+1)}
     data_format = {}
+    data_edge = {last_colMBR_idx: {}, last_lineMBR_idx: {}}
     point = ipt.readline().strip()
     while point:
         gene, x, y, value = point.split('\t')
@@ -62,18 +62,43 @@ def format_data(data_file, data_info):
             data_format[trans_y] = {}
         if trans_x not in data_format[trans_y].keys():
             data_format[trans_y][trans_x] = [0]
+        if x in last_col_range:
+            print("done col")
+            if trans_y not in data_edge[last_colMBR_idx].keys():
+                data_edge[last_colMBR_idx][trans_y] = []
+            data_edge[last_colMBR_idx][trans_y].append(':'.join([gene, str(x), str(y), value]))
+        if y in last_line_range:
+            print("done line")
+            if trans_x not in data_edge[last_lineMBR_idx].keys():
+                data_edge[last_lineMBR_idx][trans_x] = []
+            data_edge[last_lineMBR_idx][trans_x].append(':'.join([gene, str(x), str(y), value]))
         data_stat['line'][trans_y] += 1
         data_stat['col'][trans_x] += 1
         data_format[trans_y][trans_x].append(':'.join([gene, str(x), str(y), value]))
         data_format[trans_y][trans_x][0] += 1
         point = ipt.readline().strip()
-    return data_stat, data_format
+    return data_stat, data_format, data_edge
+
+
+def data_merge(data_format, data_edge):
+    last_col, last_line = list(data_edge.keys())
+    for line_key in data_edge[last_col]:
+        if line_key not in data_format[last_col].keys():
+            data_format[last_col][line_key] = []
+        data_format[last_col][line_key].extend(data_edge[last_col][line_key])
+    for col_key in data_edge[last_line]:
+        if last_line not in data_format[col_key].keys():
+            data_format[col_key][last_line] = []
+        data_format[col_key][last_line].extend(data_edge[last_line][col_key])
+    return data_format
 
 
 def load_data(data_file, grid_size):
     data_info = matrix_info(data_file, grid_size)
-    # print(data_info)
-    data_stat, data_format = format_data(data_file, data_info)
+    print(data_info['info'])
+    data_stat, data_format, data_edge = format_data(data_file, data_info)
+    data_format = data_merge(data_format, data_edge)
+    return data_format, data_info, data_stat
 
 
 if __name__ == '__main__':
