@@ -16,7 +16,7 @@ def extremum(x, y, min_x, min_y, max_x, max_y):
 def info_sort(data_info):
     data_info['nz_col'] = sorted(list(data_info['nz_col']))
     data_info['nz_line'] = sorted(list(data_info['nz_line']))
-    data_info['gene_lis'] = sorted(list(data_info['gene_list']))
+    data_info['gene_list'] = sorted(list(data_info['gene_list']))
     return data_info
 
 
@@ -63,12 +63,10 @@ def format_data(data_file, data_info):
         if trans_x not in data_format[trans_y].keys():
             data_format[trans_y][trans_x] = [0]
         if x in last_col_range:
-            print("done col")
             if trans_y not in data_edge[last_colMBR_idx].keys():
                 data_edge[last_colMBR_idx][trans_y] = []
             data_edge[last_colMBR_idx][trans_y].append(':'.join([gene, str(x), str(y), value]))
         if y in last_line_range:
-            print("done line")
             if trans_x not in data_edge[last_lineMBR_idx].keys():
                 data_edge[last_lineMBR_idx][trans_x] = []
             data_edge[last_lineMBR_idx][trans_x].append(':'.join([gene, str(x), str(y), value]))
@@ -93,18 +91,36 @@ def data_merge(data_format, data_edge):
     return data_format
 
 
-def load_data(data_file, grid_size):
-    data_info = matrix_info(data_file, grid_size)
+def build_index(data_format, data_info, data_stat):
+    min_x, min_y, max_x, max_y, grid_size = data_info['info']
     print(data_info['info'])
+    col = set(range(min_x, max_x + 1))
+    line = set(range(min_y, max_y + 1))
+    zero_col = sorted(list(col.difference(data_info['nz_col'])))
+    zero_line = sorted(list(line.difference(data_info['nz_line'])))
+    print(data_info['nz_col'], '\n', data_info['nz_line'])
+    print(len(zero_col), '\n', len(zero_line))
+
+
+def printf_data(index_file, out_file, data_format, data_info, data_stat):
+    opt = open(out_file, 'w')
+    idx = open(index_file, 'w')
+
+
+
+def main(data_file, index_file, out_file, grid_size):
+    data_info = matrix_info(data_file, grid_size)
     data_stat, data_format, data_edge = format_data(data_file, data_info)
     data_format = data_merge(data_format, data_edge)
-    return data_format, data_info, data_stat
+    printf_data(index_file, out_file, data_format, data_info, data_stat)
 
 
 if __name__ == '__main__':
     file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w.txt"
+    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
+    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
     grid = 5
     st = time.time()
-    load_data(file, grid)
+    main(file, index, out, grid)
     ed = time.time()
     print("run_time = ", ed-st, 's')

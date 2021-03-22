@@ -1,7 +1,7 @@
 import time
 import numpy as np
 import pandas as pd
-from src import load_grid
+from src import load_grid_relatively
 
 
 def grid_info(data):
@@ -40,10 +40,8 @@ def printf_data(index_file, data_file, info_dict, data_grid):
 
 
 def main(raw_file, index_file, data_file, grid_size):
-    data_grid = load_grid.load_data(raw_file, grid_size)
-    info_dict, data_grid = grid_info(data_grid)
-    data_grid = format_grid(data_grid, grid_size)
-    print(info_dict['zero_col'])
+    data_format, data_info, data_stat = load_grid_relatively.load_data(raw_file, grid_size)
+
 
 
 if __name__ == '__main__':
