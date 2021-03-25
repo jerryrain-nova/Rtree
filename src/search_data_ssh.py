@@ -116,13 +116,16 @@ def get_data_new(data_file, data_range, target, size=2000):
     seek_time = 0
     seek_num = 0
     filter_time = 0
+    read_time = 0
     for data_idx in range(0, length, 2):
         start_time = time.time()
         data.seek(data_range[data_idx])
+        seek_t = time.time()
         get_data = data.read(data_range[data_idx + 1] - data_range[data_idx])
-        now_time = time.time()
-        seek_time += now_time - start_time
+        read_t = time.time()
+        seek_time += seek_t - start_time
         seek_num += 1
+        read_time += read_t - seek_t
         data_list = get_data.split(',')[:-1]
         split_lf, split_rh = False, False
         for idx in range(size):
@@ -152,10 +155,11 @@ def get_data_new(data_file, data_range, target, size=2000):
                     data_filter.append(point)
             data_list = data_filter
         end_time = time.time()
-        filter_time += end_time - now_time
+        filter_time += end_time - read_t
         data_target.extend(data_list)
     print("\tseek_num = ", seek_num)
     print("\tseek_time = ", seek_time, 's')
+    print("\tread_time = ", read_time, 's')
     print("\tfilter_time = ", filter_time, 's')
     return data_target
 

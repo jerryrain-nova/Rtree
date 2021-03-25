@@ -41,6 +41,38 @@ def load(file):
     return data_dict
 
 
+def load_disorder(file):
+    with open(file, 'rt') as Input:
+        Input.readline()
+        max_y = max_x = 0
+        min_y = min_x = 99999999
+        data_dict = {'each_stat': [[], []]}
+        for line in Input:
+            point = [gene, x, y, value] = line.strip().split('\t')
+            x, y = int(x), int(y)
+            if y >= max_y:
+                max_y = y
+            if y < min_y:
+                min_y = y
+            if x >= max_x:
+                max_x = x
+            if x < min_x:
+                min_x = x
+            if y not in data_dict.keys():
+                data_dict[y] = []
+            data_dict[y].append(point)
+        count_list = [0] * (max_y - min_y + 1)
+        line_range = list(range(min_y, max_y+1))
+        nz_line = []
+        for line_idx in line_range:
+            if line_idx in data_dict.keys():
+                count_list[line_range.index(line_idx)] = len(data_dict[line_idx])
+            nz_line.append(line_idx)
+    data_dict['each_stat'][0] = count_list
+    data_dict['each_stat'][1] = nz_line
+    return data_dict
+
+
 def line_cut(data_dict):
     each_stat = np.asarray(data_dict['each_stat'][0])
     each_idx = np.asarray(data_dict['each_stat'][1])
@@ -163,7 +195,7 @@ def column_cut_block(data, size=2000):
 
 
 def format(file):
-    data_dict = load(file)
+    data_dict = load_disorder(file)
     data_by_line = line_cut(data_dict)
     data_format = {}
     length_list = []

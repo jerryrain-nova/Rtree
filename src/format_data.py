@@ -140,7 +140,7 @@ def column_cut_block(data, size=2000):
 
 
 def format(file):
-    data_dict = load_data.load(file)
+    data_dict = load_data.load_disorder(file)
     data_by_line = line_cut(data_dict)
     data_format = {}
     data_format['size'] = data_dict['size']
@@ -202,7 +202,7 @@ def printf_data(data_format, index_file, data_file):
 
 if __name__ == '__main__':
     start_time = time.time()
-    file = "C:/Users/chenyujie/Desktop/Test/spatial_1kw.txt"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w.txt"
     data_format = format(file)
     index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
     out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"

@@ -1,4 +1,5 @@
 import time
+from sys import argv
 
 
 def extremum(x, y, min_x, min_y, max_x, max_y):
@@ -81,44 +82,79 @@ def format_data(data_file, data_info):
 def data_merge(data_format, data_edge):
     last_col, last_line = list(data_edge.keys())
     for line_key in data_edge[last_col]:
-        if line_key not in data_format[last_col].keys():
-            data_format[last_col][line_key] = []
-        data_format[last_col][line_key].extend(data_edge[last_col][line_key])
+        if last_col not in data_format[line_key].keys():
+            data_format[line_key][last_col] = []
+        data_format[line_key][last_col].extend(data_edge[last_col][line_key])
     for col_key in data_edge[last_line]:
-        if last_line not in data_format[col_key].keys():
-            data_format[col_key][last_line] = []
-        data_format[col_key][last_line].extend(data_edge[last_line][col_key])
+        if col_key not in data_format[last_line].keys():
+            data_format[last_line][col_key] = []
+        data_format[last_line][col_key].extend(data_edge[last_line][col_key])
     return data_format
 
 
 def build_index(data_format, data_info, data_stat):
-    min_x, min_y, max_x, max_y, grid_size = data_info['info']
-    print(data_info['info'])
-    col = set(range(min_x, max_x + 1))
-    line = set(range(min_y, max_y + 1))
-    zero_col = sorted(list(col.difference(data_info['nz_col'])))
-    zero_line = sorted(list(line.difference(data_info['nz_line'])))
-    print(data_info['nz_col'], '\n', data_info['nz_line'])
-    print(len(zero_col), '\n', len(zero_line))
+    nz_col = data_info['nz_col']
+    nz_line = data_info['nz_line']
+    for query in [nz_line, nz_col]:
+        last_idx = init_idx = query[0]
+        opt_list = []
+        num = 0
+        for idx in query:
+            if idx - last_idx > 1:
+                opt_list.extend([init_idx, last_idx])
+                init_idx = idx
+                num += 1
+            last_idx = idx
+        print("block_num = ", num)
+        print(opt_list)
 
 
 def printf_data(index_file, out_file, data_format, data_info, data_stat):
     opt = open(out_file, 'w')
     idx = open(index_file, 'w')
+    print(','.join(list(map(str, list(data_info['info'])))), file=idx)
 
+    Bit = 0
+    Bit_block = [Bit]
+    print(','.join(list(map(str, sorted(list(data_format.keys()))))), file=idx)
+    for line in sorted(list(data_format.keys())):
+        bit = 0
+        print(','.join(list(map(str, sorted(list(data_format[line].keys()))))), file=idx)
+        for col in sorted(list(data_format[line].keys())):
+            print(';'.join(data_format[line][col][1:]), end=',', file=opt)
+            Bit += len(','.join(data_format[line][col][1:]).encode()) + 1
+            bit += len(','.join(data_format[line][col][1:]).encode()) + 1
+            print(bit, end=',', file=idx)
+        print('', file=idx)
+        Bit_block.append(Bit)
+    print(','.join(list(map(str, Bit_block))), file=idx)
 
 
 def main(data_file, index_file, out_file, grid_size):
     data_info = matrix_info(data_file, grid_size)
     data_stat, data_format, data_edge = format_data(data_file, data_info)
     data_format = data_merge(data_format, data_edge)
+    # build_index(data_format, data_info, data_stat)
+    print(data_format.keys())
     printf_data(index_file, out_file, data_format, data_info, data_stat)
+
+
+def rename_out(input_file, opt_path):
+    path = input_file.split('/')[-1]
+    prefix = path.split('.')[:-1]
+    prefix = '.'.join(prefix)
+    out_data = opt_path + '/' + prefix + '_data.txt'
+    out_index = opt_path + '/' + prefix + '_index.txt'
+    return out_data, out_index
 
 
 if __name__ == '__main__':
     file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w.txt"
     index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
     out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    # file = argv[1]
+    # out_path = argv[2]
+    # out, index = rename_out(file, out_path)
     grid = 5
     st = time.time()
     main(file, index, out, grid)
