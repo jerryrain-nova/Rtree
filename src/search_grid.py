@@ -56,7 +56,8 @@ def read_data(index_file, data_file, ipt_target, out_file):
     dt = open(data_file, 'r')
     opt = open(out_file, 'w')
     info_list = list(map(int, idx.readline().strip().split(',')))
-    init_line, stop_line, init_col, stop_col = target_info(ipt_target, info_list)
+    target_list = target_info(ipt_target, info_list)
+    init_line, stop_line, init_col, stop_col = target_list
     line_list = list(map(int, idx.readline().strip().split(',')))
     col_info = idx.readlines()
     init_list = list(map(int, col_info[-1].strip().split(',')))
@@ -98,17 +99,15 @@ def read_data(index_file, data_file, ipt_target, out_file):
     print("read_time = ", read_time, 's')
     print("print_time = ", ed-print_t, 's')
     print("search_time = ", ed-st, 's')
-    return opt_data, nz_bin, info_list
+    return opt_data, nz_bin, target_list
 
 
-def trans_dataframe(opt_data, nz_bin, info_list):
+def trans_dataframe(opt_data, nz_bin, target_list):
     st = time.time()
-    min_x, min_y, max_x, max_y, grid_size = info_list
-    line_num = int((max_y-min_y)/grid_size) + 1
-    col_num = int((max_x-min_x)/grid_size) + 1
+    init_line, stop_line, init_col, stop_col = target_list
     bin_name = []
-    for line in range(line_num):
-        for col in range(col_num):
+    for line in range(init_line, stop_line+1):
+        for col in range(init_col, stop_col+1):
             bin_name.append(str(line)+':'+str(col))
     bin_num = len(bin_name)
 
@@ -121,30 +120,32 @@ def trans_dataframe(opt_data, nz_bin, info_list):
                 gene, x, y, value = point.split(':')
                 if gene not in data_trans.keys():
                     data_trans[gene] = [0] * bin_num
-                data_trans[gene][bin_name.index(name)] += 1
+                data_trans[gene][bin_name.index(name)] += int(value)
             idx += 1
-    print(data_trans.keys())
-    print(len(data_trans['THRAP3']))
+    dt_f = pd.DataFrame.from_dict(data_trans, orient='index', columns=bin_name)
     ed = time.time()
     print("trans_dataframe_time = ", ed-st, 's')
+    return dt_f
 
 
 def main(index_file, data_file, ipt_target, out_file):
-    search_data, nz_bin, info_list = read_data(index_file, data_file, ipt_target, out_file)
-    trans_dataframe(search_data, nz_bin, info_list)
+    search_data, nz_bin, target_list = read_data(index_file, data_file, ipt_target, out_file)
+    data_f = trans_dataframe(search_data, nz_bin, target_list)
+    return data_f
 
 
 if __name__ == '__main__':
     index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
     data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
     out = "C:/Users/chenyujie/Desktop/Test/spatial_format_search.result"
-    target = '4900:5200,4500:4800'
+    target = '4900:5900,4500:5500'
     # file_path = argv[1]
     # index = file_path + '_index.txt'
     # data = file_path + '_data.txt'
     # out = file_path + '_search.result'
     # target = argv[2]
     st = time.time()
-    main(index, data, target, out)
+    df = main(index, data, target, out)
+    print(df)
     ed = time.time()
     print("run_time = ", ed-st, 's')
