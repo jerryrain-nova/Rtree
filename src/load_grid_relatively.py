@@ -46,8 +46,8 @@ def format_data(data_file, data_info):
     ipt = open(data_file, 'r')
     ipt.readline()
     min_x, min_y, max_x, max_y, grid_size = data_info['info']
-    last_col_range = list(range(max_x+1-grid_size, max_x))
-    last_line_range = list(range(max_y+1-grid_size, max_y))
+    last_col_range = list(range(max_x+1-grid_size, max_x//grid_size*grid_size))
+    last_line_range = list(range(max_y+1-grid_size, max_y//grid_size*grid_size))
     last_colMBR_idx = int((max_x-min_x)/grid_size)
     last_lineMBR_idx = int((max_y-min_y)/grid_size)
     data_stat = {'col': [0] * (last_colMBR_idx+1), 'line': [0] * (last_lineMBR_idx+1)}
@@ -81,14 +81,16 @@ def format_data(data_file, data_info):
 
 def data_merge(data_format, data_edge):
     last_col, last_line = list(data_edge.keys())
-    for line_key in data_edge[last_col]:
-        if last_col not in data_format[line_key].keys():
-            data_format[line_key][last_col] = []
-        data_format[line_key][last_col].extend(data_edge[last_col][line_key])
-    for col_key in data_edge[last_line]:
-        if col_key not in data_format[last_line].keys():
-            data_format[last_line][col_key] = []
-        data_format[last_line][col_key].extend(data_edge[last_line][col_key])
+    if not data_edge[last_col]:
+        for line_key in data_edge[last_col]:
+            if last_col not in data_format[line_key].keys():
+                data_format[line_key][last_col] = []
+            data_format[line_key][last_col].extend(data_edge[last_col][line_key])
+    if not data_edge[last_line]:
+        for col_key in data_edge[last_line]:
+            if col_key not in data_format[last_line].keys():
+                data_format[last_line][col_key] = []
+            data_format[last_line][col_key].extend(data_edge[last_line][col_key])
     return data_format
 
 

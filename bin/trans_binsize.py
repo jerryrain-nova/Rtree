@@ -1,61 +1,81 @@
-def coordinate_trans(index_file, init, target):
-    idx = open(index_file, 'r')
-    x_size, y_size = idx.readline().strip().split(',')
-    x_size, y_size = int(x_size), int(y_size)
-    x_trans = y_trans = []
-    if target % init != 0:
-        print("Can't complete BinSize transform")
-        quit()
-    if target % init == 0:
-        x_trans = list(range(0, x_size, target))
-        y_trans = list(range(0, y_size, target))
-
-    idx.close()
-    return x_trans, y_trans
+from collections import Counter
 
 
-def create_bin_block(init_line, stop_line, multi):
-    init = init_line/multi
-    stop = stop_line/multi
-    block = {}
-    for i in range(init, stop+1):
-        block[i] = []
-    return block
+def trans_bin(index_file, data_file, target):
+    data_ipt = open(data_file, 'r')
+    index_ipt = open(index_file, 'r')
+    target = int(target)
+    min_x, min_y, max_x, max_y, grid_size = list(map(int, index_ipt.readline().strip().split(',')))
+    if target % grid_size != 0:
+        quit("Can't transform data from " + str(grid_size) + " to " + str(target))
+
+    times = target // grid_size
+    line_list = list(map(int, index_ipt.readline().strip().split(',')))
+    trans_line_list = list(map(lambda x: x // times, line_list))
+    print(trans_line_list)
+    all_col_list = index_ipt.readlines()
+    seek_pos_list = list(map(int, all_col_list[-1].strip().split(',')))
+
+    last_col_range = list(range(max_x + 1 - grid_size, max_x // grid_size * grid_size))
+    last_line_range = list(range(max_y + 1 - grid_size, max_y // grid_size * grid_size))
+    last_lineBin_idx = max_y // target
+    last_colBin_idx = max_x // target
+    data_edge = {last_colBin_idx: {}, last_lineBin_idx: {}}
+
+    trans_data = {}
+    last_line = trans_line_list[0]
+    for i in range(len(trans_line_list)):
+        if trans_line_list[i] not in trans_data.keys():
+            trans_data[trans_line_list[i]] = {}
+        col_list = list(map(int, all_col_list[2 * i].strip().split(',')))
+        trans_col_list = list(map(lambda x: x // times, col_list))
+        col_pos_list = list(map(int, all_col_list[2 * i + 1].strip().split(',')[:-1]))
+        col_pos_list.insert(0, 0)
+        last_col = trans_col_list[0]
+        last_idx = col_pos_list[0]
+        seek_pos = seek_pos_list[i]
+        data_ipt.seek(seek_pos)
+        for col_idx in range(len(trans_col_list)):
+            if trans_col_list[col_idx] == last_col:
+                continue
+            if trans_col_list[col_idx - 1] not in trans_data[trans_line_list[i]].keys():
+                trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]] = {}
+            data_read = data_ipt.read(col_pos_list[col_idx] - last_idx)
+            last_idx = col_pos_list[col_idx]
+            last_col = trans_col_list[col_idx]
+            blocks = data_read.split(',')[:-1]
+            for block in blocks:
+                points = block.split(';')
+                for point in points:
+                    gene, x, y, value = point.split(':')
+                    if gene not in trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]].keys():
+                        trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]][gene] = 0
+                    trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]][gene] += int(value)
+
+    # fill the last block
+    data_ipt.seek(seek_pos_list[-2])
+    data_read = data_ipt.read(col_pos_list[-1] - last_idx)
+    if trans_col_list[-1] not in trans_data[trans_line_list[-1]].keys():
+        trans_data[trans_line_list[-1]][trans_col_list[-1]] = {}
+    blocks = data_read.split(',')[:-1]
+    for block in blocks:
+        points = block.split(';')
+        for point in points:
+            gene, x, y, value = point.split(':')
+            if gene not in trans_data[trans_line_list[-1]][trans_col_list[-1]].keys():
+                trans_data[trans_line_list[-1]][trans_col_list[-1]][gene] = 0
+            trans_data[trans_line_list[-1]][trans_col_list[-1]][gene] += int(value)
+    return trans_data
 
 
-def data_trans(index_file, data_file, x_trans, y_trans, init, target):
-    idx = open(index_file, 'r')
-    dt = open(data_file, 'r')
-    multi = target/init
-    idx.readline()
-    line_idx = list(map(int, idx.readline().strip().split(':')))
-    for block_idx in range(0, len(line_idx), 2):
-        init_line = line_idx[block_idx]
-        stop_line = line_idx[block_idx+1]
-        block = create_bin_block(init_line, stop_line, multi)
-        col_idx = list(map(int, idx.readline().strip().split(':')))
-        data_idx = list(map(int, idx.readline().strip().split(',')[:-1]))
-        dt.seek(data_idx[0])
-        date_inLine = dt.read(data_idx[-1]-data_idx[0])
-
-        for point in date_inLine.split(',')[:-1]:
-                gene, x, y, value = point.split(':')
-
-
-        line_bin = list(range(init_line, stop_line+1, target/init))
-        for i in
-
-
-def main(index_file, data_file, out_file, init, target):
-    x_trans, y_trans = coordinate_trans(index_file, init, target)
-    data_trans(index_file, data_file, x_trans, y_trans, init, target)
+def main(index_file, data_file, out_file, out_index_file, target):
+    trans_data = trans_bin(index_file, data_file, target)
 
 
 if __name__ == '__main__':
     index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
     data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
-    init_bin = 1
-    target_bin = 5
-    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".txt"
-    main(index, data, out, init_bin, target_bin)
-
+    target_bin = 15
+    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".data"
+    out_index = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".index"
+    main(index, data, out, out_index, target_bin)
