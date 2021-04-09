@@ -46,10 +46,10 @@ def format_data(data_file, data_info):
     ipt = open(data_file, 'r')
     ipt.readline()
     min_x, min_y, max_x, max_y, grid_size = data_info['info']
-    last_col_range = list(range(max_x+1-grid_size, max_x//grid_size*grid_size))
-    last_line_range = list(range(max_y+1-grid_size, max_y//grid_size*grid_size))
-    last_colMBR_idx = int((max_x-min_x)/grid_size)
-    last_lineMBR_idx = int((max_y-min_y)/grid_size)
+    last_colMBR_idx = int((max_x - min_x) / grid_size)
+    last_lineMBR_idx = int((max_y - min_y) / grid_size)
+    last_col_range = list(range(max_x+1-grid_size, last_colMBR_idx*grid_size))
+    last_line_range = list(range(max_y+1-grid_size, last_lineMBR_idx*grid_size))
     data_stat = {'col': [0] * (last_colMBR_idx+1), 'line': [0] * (last_lineMBR_idx+1)}
     data_format = {}
     data_edge = {last_colMBR_idx: {}, last_lineMBR_idx: {}}
@@ -107,8 +107,6 @@ def build_index(data_format, data_info, data_stat):
                 init_idx = idx
                 num += 1
             last_idx = idx
-        print("block_num = ", num)
-        print(opt_list)
 
 
 def printf_data(index_file, out_file, data_format, data_info, data_stat):
@@ -124,8 +122,8 @@ def printf_data(index_file, out_file, data_format, data_info, data_stat):
         print(','.join(list(map(str, sorted(list(data_format[line].keys()))))), file=idx)
         for col in sorted(list(data_format[line].keys())):
             print(';'.join(data_format[line][col][1:]), end=',', file=opt)
-            Bit += len(','.join(data_format[line][col][1:]).encode()) + 1
-            bit += len(','.join(data_format[line][col][1:]).encode()) + 1
+            Bit += len(';'.join(data_format[line][col][1:]).encode()) + 1
+            bit += len(';'.join(data_format[line][col][1:]).encode()) + 1
             print(bit, end=',', file=idx)
         print('', file=idx)
         Bit_block.append(Bit)
@@ -137,7 +135,6 @@ def main(data_file, index_file, out_file, grid_size):
     data_stat, data_format, data_edge = format_data(data_file, data_info)
     data_format = data_merge(data_format, data_edge)
     # build_index(data_format, data_info, data_stat)
-    print(data_format.keys())
     printf_data(index_file, out_file, data_format, data_info, data_stat)
 
 
@@ -145,19 +142,20 @@ def rename_out(input_file, opt_path):
     path = input_file.split('/')[-1]
     prefix = path.split('.')[:-1]
     prefix = '.'.join(prefix)
-    out_data = opt_path + '/' + prefix + '_data.txt'
-    out_index = opt_path + '/' + prefix + '_index.txt'
+    out_data = opt_path + '/' + prefix + '.data'
+    out_index = opt_path + '/' + prefix + '.index'
     return out_data, out_index
 
 
 if __name__ == '__main__':
-    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w.txt"
-    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
-    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
-    # file = argv[1]
-    # out_path = argv[2]
-    # out, index = rename_out(file, out_path)
-    grid = 5
+    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    # index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
+    # out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    # grid = 5
+    file = argv[1]
+    out_path = argv[2]
+    grid = int(argv[3])
+    out, index = rename_out(file, out_path)
     st = time.time()
     main(file, index, out, grid)
     ed = time.time()

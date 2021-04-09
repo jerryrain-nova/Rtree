@@ -135,13 +135,13 @@ def main(index_file, data_file, ipt_target, out_file):
 
 
 if __name__ == '__main__':
-    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
-    data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    index = "C:/Users/chenyujie/Desktop/Test/spatial_format.index"
+    data = "C:/Users/chenyujie/Desktop/Test/spatial_format.data"
     out = "C:/Users/chenyujie/Desktop/Test/spatial_format_search.result"
     target = '4900:5900,4500:5500'
     # file_path = argv[1]
-    # index = file_path + '_index.txt'
-    # data = file_path + '_data.txt'
+    # index = file_path + '.index'
+    # data = file_path + '.data'
     # out = file_path + '_search.result'
     # target = argv[2]
     st = time.time()

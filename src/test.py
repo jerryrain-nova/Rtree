@@ -1,3 +1,5 @@
-a = [1,2,3]
-a.insert(0, 0)
-print(a.index(1))
+from bisect import bisect_left
+a = [0]
+b = 1
+p = bisect_left(a, b)
+print(p)
