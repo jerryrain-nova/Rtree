@@ -190,7 +190,7 @@ def search_data(index, data, target):
 if __name__ == '__main__':
     index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
     data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
-    target = '4:1050,270:7700'
+    target = '3000:13000,3000:13000'
     data_target = search_data(index, data, target)
 
 

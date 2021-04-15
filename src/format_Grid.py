@@ -49,9 +49,9 @@ def main(raw_file, index_file, data_file, grid_size):
 
 if __name__ == '__main__':
     start_time = time.time()
-    file = "C:/Users/chenyujie/Desktop/Test/spatial_1w.txt"
-    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
-    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    index = "C:/Users/chenyujie/Desktop/Test/spatial_format.index"
+    out = "C:/Users/chenyujie/Desktop/Test/spatial_format.data"
     grid = 5
     main(file, index, out, grid)
     end_time = time.time()
