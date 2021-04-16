@@ -1,6 +1,2 @@
-a = set()
-a.add(1)
-a.add(3)
-a.add(2)
-a = list(sorted(a))
-print(a.index(2))
+a = list(range(1, 10))
+print(a)

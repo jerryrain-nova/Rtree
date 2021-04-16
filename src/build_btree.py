@@ -2,16 +2,17 @@ import sys
 from collections import deque
 from bisect import bisect_left, bisect_right
 from random import shuffle
+from struct import pack, unpack
 import time
 
 
 class BKeyWord(object):
-    __slots__ = ('key', 'data')
-    def __init__(self, key, data):
+    __slots__ = ('key', 'value')
+    def __init__(self, key, value):
         self.key = key
-        self.data = data
+        self.value = value
     def __str__(self):
-        return str((self.key, self.data))
+        return str((self.key, self.value))
     def __cmp__(self, key):
         if self.key > key:
             return 1
@@ -24,7 +25,8 @@ class BKeyWord(object):
 class BLeaf(object):
     def __init__(self, M):
         self._M = M
-        self.data = []
+        self.key = []
+        self.value = []
         self.par = None
         self.bro = None
     def isleaf(self):
@@ -33,9 +35,9 @@ class BLeaf(object):
     def M(self):
         return self._M
     def isfull(self):
-        return len(self.data) > self.M
+        return len(self.key) > self.M
     def isempty(self):
-        return len(self.data) < (self.M + 1) // 2
+        return len(self.key) < (self.M + 1) // 2
 
 
 class BInterNode(object):
@@ -59,11 +61,15 @@ class BInterNode(object):
 class Btree(object):
     def __init__(self, M):
         self._M = M
+        self._height = 1
         self._root = BLeaf(M)
         self._leaf = self._root
     @property
     def M(self):
         return self._M
+    @property
+    def H(self):
+        return self._height
     def insert(self, key_word):
         node = self._root
         def split_node(nd):
@@ -83,6 +89,7 @@ class Btree(object):
                 newroot.ilist = [nd, newnode]
                 newnode.par = nd.par = newroot
                 self._root = newroot
+                self._height += 1
             else:
                 if nd.klist[0] not in nd.par.klist:
                     nd.par.klist[0] = nd.klist[0]
@@ -93,20 +100,23 @@ class Btree(object):
         def split_leaf(lf):
             mid = (self.M+1)//2
             newleaf = BLeaf(self.M)
-            newleaf.data = lf.data[mid:]
+            newleaf.key = lf.key[mid:]
+            newleaf.value = lf.value[mid:]
             newleaf.par = lf.par
-            lf.data = lf.data[:mid]
+            lf.key = lf.key[:mid]
+            lf.value = lf.value[:mid]
             newleaf.bro = lf.bro
             lf.bro = newleaf
             if lf.par is None:
                 newroot = BInterNode(self.M)
-                newroot.klist = [lf.data[0], newleaf.data[0]]
+                newroot.klist = [lf.key[0], newleaf.key[0]]
                 newroot.ilist = [lf, newleaf]
                 newleaf.par = lf.par = newroot
                 self._root = newroot
+                self._height += 0
             else:
-                idx = lf.par.klist.index(lf.data[0])
-                lf.par.klist.insert(idx+1, newleaf.data[0])
+                idx = lf.par.klist.index(lf.key[0])
+                lf.par.klist.insert(idx + 1, newleaf.key[0])
                 lf.par.ilist.insert(idx+1, newleaf)
             return lf.par
         def insert_node(n):
@@ -120,8 +130,9 @@ class Btree(object):
                     insert_node(split_node(n))
                     return
             else:
-                p = bisect_left(n.data, key_word.key)
-                n.data.insert(p, key_word.key)
+                p = bisect_left(n.key, key_word.key)
+                n.key.insert(p, key_word.key)
+                n.value.insert(p, key_word.value)
                 if n.isfull():
                     split_leaf(n)
         insert_node(node)
@@ -133,20 +144,20 @@ class Btree(object):
             raise ImportError('you need to setup searching range')
         elif mi is not None and ma is not None and mi > ma:
             raise ImportError('upper bound must be greater or equal than lower bound')
-        def search_key(n, k):
+        def search_key(n, key):
             if n.isleaf():
-                p = bisect_left(n.data, k)
-                if p == len(n.data):
+                p = bisect_left(n.key, key)
+                if p == len(n.key):
                     p = p-1
                 return p, n
             else:
-                p = bisect_right(n.klist, k)
-                return search_key(n.ilist[p-1], k)
+                p = bisect_right(n.klist, key)
+                return search_key(n.ilist[p-1], key)
         if mi is None:
             while True:
-                for kv in leaf.data:
-                    if kv <= ma:
-                        result.append(kv)
+                for k in leaf.key:
+                    if k <= ma:
+                        result.append(k)
                     else:
                         return result
                 if leaf.bro is None:
@@ -155,19 +166,19 @@ class Btree(object):
                     leaf = leaf.bro
         elif ma is None:
             index, leaf = search_key(node, mi)
-            result.extend(leaf.data[index:])
+            result.extend(leaf.key[index:])
             while True:
                 if leaf.bro is None:
                     return result
                 else:
                     leaf = leaf.bro
-                    result.extend(leaf.data)
+                    result.extend(leaf.key)
         else:
             if mi == ma:
                 index, leaf = search_key(node, mi)
                 try:
-                    if leaf.data[index] == mi:
-                        result.append(leaf.data[index])
+                    if leaf.key[index] == mi:
+                        result.append(leaf.key[index])
                         return result
                     else:
                         return result
@@ -180,19 +191,18 @@ class Btree(object):
                     if i1 == i2:
                         return result
                     else:
-                        result.extend(l1.data[i1:i2+1])
+                        result.extend(l1.key[i1:i2 + 1])
                         return result
                 else:
-                    result.extend(l1.data[i1:])
+                    result.extend(l1.key[i1:])
                     l = l1
                     while l.bro:
                         if l.bro == l2:
-                            result.extend(l2.data[:i2+1])
+                            result.extend(l2.key[:i2 + 1])
                             return result
                         else:
-                            result.extend(l.bro.data)
+                            result.extend(l.bro.key)
                             l = l.bro
-
     def show(self):
         print('this b+tree is:')
         q = deque()
@@ -210,7 +220,124 @@ class Btree(object):
                         h += 1
                     q.extend([i, h] for i in w.ilist)
                 else:
-                    print([v for v in w.data], 'this leaf is, ', hei)
+                    print([k for k in w.key], [v for v in w.value], 'this leaf is, ', hei)
+    def leaf_tosave(self, file):
+        opt = open(file, 'wb')
+        if self._root.isleaf():
+            return "Data Num is too small to build bptree"
+        bit_list = deque()
+        bit_list.append(0)
+        bit = 0
+        q = deque()
+        h = 0
+        q.append([self._root, h])
+        while True:
+            try:
+                w, hei = q.popleft()
+            except IndexError:
+                opt.close()
+                return
+            else:
+                if not w.isleaf():
+                    if hei == h:
+                        h += 1
+                    q.extend([i, h] for i in w.ilist)
+                else:
+                    num = len(w.key)
+                    cache = b''
+                    for i in range(num):
+                        value = list(map(int, w.value[i].split(':')))
+                        cache += pack('Q2I', w.key[i], *value)
+                        bit += 16
+                    bit_list.append(bit)
+                    w.key = [bit_list.popleft()]
+                    w.value = [num]
+                    opt.write(cache)
+    def node_tosave(self, file):
+        idx = {'offset': []}
+        opt = open(file, 'wb')
+        if self._root.isleaf():
+            return "Data Num is too small to build bptree"
+        q = deque()
+        h = 0
+        q.append([self._root, h])
+        while True:
+            try:
+                w, hei = q.popleft()
+            except IndexError:
+                break
+            else:
+                if not w.isleaf():
+                    if hei not in idx.keys():
+                        idx[hei] = []
+                    idx[hei].extend(w.klist)
+                    if hei == h:
+                        h += 1
+                    q.extend([i, h] for i in w.ilist)
+                else:
+                    idx['offset'].extend(w.key)
+        opt.write(pack('2H', len(list(idx.keys())), self.M))
+        for key in list(idx.keys())[1:]:
+            num = len(idx[key])
+            opt.write(pack('I', num))
+            opt.write(pack(str(num)+'I', *idx[key]))
+        num = len(idx['offset'])
+        opt.write(pack('I', num))
+        opt.write(pack(str(num)+'I', *idx['offset']))
+        opt.close()
+
+
+class BtreeIndex:
+    def __init__(self):
+        self._M = 256
+        self._root = BInterNode(self.M)
+        self._height = None
+
+    @property
+    def M(self):
+        return self._M
+
+    @property
+    def H(self):
+        return self._height
+
+    def load_index(self, file):
+        idx = open(file, 'rb').readline()
+        print(unpack('2H', idx[:4]))
+        self._height, M = unpack('2H', idx[:4])[:2]
+        if M != self.M:
+            self._M = M
+            self._root = BInterNode(self.M)
+
+        pos_st = 4
+        num, num_full = int(), True
+        q = deque()
+        h = 0
+        q.append([self._root, h])
+        while True:
+            try:
+                node, hei = q.popleft()
+            except IndexError:
+                break
+            if num_full:
+                num = unpack('I', idx[pos_st:pos_st + 4])[0]
+                pos_st += 4
+            key_list = unpack(str(num)+'I', idx[pos_st:pos_st + 4 * num])
+            pos_st += 4 * num
+            for i in range(num-1):
+                if h == hei:
+                    h += 1
+                st = key_list.index(node.klist[i])
+                ed = key_list.index(node.klist[i+1])
+                newnode = BInterNode(self.M)
+                newnode.klist.extend(key_list[st:ed+1])
+                node.ilist[i] = newnode
+                q.extend([newnode, h])
+            num_full = True
+
+
+
+
 
 
 def test():

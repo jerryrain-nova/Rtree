@@ -22,6 +22,7 @@ class DataKey:
         self.y_list = []
         self.gene_list = []
         self.value_list = []
+        self.bptree = None
 
     def border_change(self, x, y):
         if self._x_mi > x:
@@ -59,6 +60,7 @@ class DataKey:
             self.value_list.append(value)
             self.all_gene.add(gene)
             point = data.readline().strip()
+        self.all_gene = sorted(self.all_gene)
 
     # def data_print(self):
     #     opt = open(self.opt, 'wb')
@@ -73,18 +75,21 @@ class DataKey:
 
     def build_bptree(self):
         st = time.time()
-        bptree = build_btree.Btree(self.rank)
+        self.bptree = build_btree.Btree(self.rank)
         for i in range(len(self.x_list)):
             primekey = str(self.x_list[i])+str(self.y_list[i])
-            kv = build_btree.BKeyWord(int(primekey), self.value_list[i])
-            bptree.insert(kv)
-        # bptree.show()
+            kv = build_btree.BKeyWord(int(primekey), str(list(self.all_gene).index(self.gene_list[i]))+':'+str(self.value_list[i]))
+            self.bptree.insert(kv)
         build_ed = time.time()
-        search_result = bptree.search(30003000, 1300013000)
-        print(len(search_result))
-        ed = time.time()
+        self.bptree.leaf_tosave(self.opt)
+        print("height =", self.bptree.H)
+        self.bptree.show()
+        self.bptree.node_tosave(self.idx)
         print("\tbuild_time =", build_ed-st, 's')
-        print("\tsearch_time =", ed-build_ed, 's')
+
+        bptree_idx = build_btree.BtreeIndex()
+        bptree_idx.load_index(self.idx)
+
 
 
 
@@ -95,7 +100,7 @@ class Project:
         self.opt = None
         self.idx = None
         self.file_name()
-        self._rank = 256
+        self._rank = 5
 
     def __str__(self):
         return "Transform Result Path(Rank=%s):\nData:%s\nIndex:%s" % (self._rank, self.opt, self.idx)
@@ -107,7 +112,7 @@ class Project:
     def file_name(self):
         prefix = self.file.split('/')[-1].split('.')[0]
         self.opt = self.path + '/' + prefix + '.data'
-        self.idx = self.path + '/' + prefix + '.idx'
+        self.idx = self.path + '/' + prefix + '.index'
 
     def do(self):
         st = time.time()
@@ -124,7 +129,7 @@ class Project:
 
 
 if __name__ == '__main__':
-    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_100.txt"
     path = "C:/Users/chenyujie/Desktop/Test"
     project = Project(file, path)
     project.do()
