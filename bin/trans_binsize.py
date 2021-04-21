@@ -46,6 +46,7 @@ def trans_bin(index_file, data_file, target):
             for block in blocks:
                 points = block.split(';')
                 for point in points:
+                    print(point)
                     gene, x, y, value = point.split(':')
                     if gene not in trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]].keys():
                         trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]][gene] = 0
@@ -133,13 +134,13 @@ def rename(prefix, target, path):
 
 
 if __name__ == '__main__':
-    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
-    data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
-    target_bin = 15
-    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".data"
-    out_index = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".index"
-    # file_prefix = argv[1]
-    # out_path = argv[2]
-    # target_bin = int(argv[3])
-    # index, data, out, out_index = rename(file_prefix, target_bin, out_path)
+    # index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
+    # data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    # target_bin = 15
+    # out = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".data"
+    # out_index = "C:/Users/chenyujie/Desktop/Test/spatial_format_bin" + str(target_bin) + ".index"
+    file_prefix = argv[1]
+    out_path = argv[2]
+    target_bin = int(argv[3])
+    index, data, out, out_index = rename(file_prefix, target_bin, out_path)
     main(index, data, out, out_index, target_bin)

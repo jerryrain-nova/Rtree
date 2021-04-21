@@ -98,7 +98,7 @@ def read_data(index_file, data_file, ipt_target, out_file):
     print("seek_time = ", seek_time, 's')
     print("read_time = ", read_time, 's')
     print("print_time = ", ed-print_t, 's')
-    print("search_time = ", ed-st, 's')
+    print("search_time = ", print_t-st, 's')
     return opt_data, nz_bin, target_list
 
 
@@ -130,22 +130,22 @@ def trans_dataframe(opt_data, nz_bin, target_list):
 
 def main(index_file, data_file, ipt_target, out_file):
     search_data, nz_bin, target_list = read_data(index_file, data_file, ipt_target, out_file)
-    data_f = trans_dataframe(search_data, nz_bin, target_list)
-    return data_f
+    # data_f = trans_dataframe(search_data, nz_bin, target_list)
+    # return data_f
 
 
 if __name__ == '__main__':
-    index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
-    data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
-    out = "C:/Users/chenyujie/Desktop/Test/spatial_format_search.result"
-    target = '3000:13000,3000:13000'
-    # file_path = argv[1]
-    # index = file_path + '.index'
-    # data = file_path + '.data'
-    # out = file_path + '_search.result'
-    # target = argv[2]
+    # index = "C:/Users/chenyujie/Desktop/Test/spatial_format_index.txt"
+    # data = "C:/Users/chenyujie/Desktop/Test/spatial_format_data.txt"
+    # out = "C:/Users/chenyujie/Desktop/Test/spatial_format_search.result"
+    # target = '3000:13000,3000:13000'
+    file_path = argv[1]
+    index = file_path + '.index'
+    data = file_path + '.data'
+    out = file_path + '_search.result'
+    target = argv[2]
     st = time.time()
-    # df = main(index, data, target, out)
+    main(index, data, target, out)
     # print(df)
     ed = time.time()
     print("run_time = ", ed-st, 's')

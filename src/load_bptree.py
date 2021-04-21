@@ -1,7 +1,10 @@
-from sys import argv
+from sys import argv, setrecursionlimit
 from src import build_btree
 from struct import pack
 import time
+import threading
+import pickle
+from bisect import bisect_left
 
 
 class DataKey:
@@ -61,6 +64,7 @@ class DataKey:
             self.all_gene.add(gene)
             point = data.readline().strip()
         self.all_gene = sorted(self.all_gene)
+        print("load_complete")
 
     # def data_print(self):
     #     opt = open(self.opt, 'wb')
@@ -77,20 +81,34 @@ class DataKey:
         st = time.time()
         self.bptree = build_btree.Btree(self.rank)
         for i in range(len(self.x_list)):
+            # primekey = 10**len(str(self.y_list[i]))*self.x_list[i]+self.y_list[i]
             primekey = str(self.x_list[i])+str(self.y_list[i])
-            kv = build_btree.BKeyWord(int(primekey), str(list(self.all_gene).index(self.gene_list[i]))+':'+str(self.value_list[i]))
+            # kv = build_btree.BKeyWord(primekey, self.value_list[i])
+            kv = build_btree.BKeyWord(int(primekey), str(bisect_left(self.all_gene, self.gene_list[i]))+':'+str(self.value_list[i]))
             self.bptree.insert(kv)
+            # print(i, 10000000)
         build_ed = time.time()
+        print("\tbuild_time =", build_ed - st, 's')
         self.bptree.leaf_tosave(self.opt)
+        data_ed = time.time()
         print("height =", self.bptree.H)
-        self.bptree.show()
-        self.bptree.node_tosave(self.idx)
-        print("\tbuild_time =", build_ed-st, 's')
+        print("save_data =", data_ed-build_ed, 's')
+        # self.bptree.show()
+        # def idx_pickle(bptree, opt_file):
+        #     opt = open(opt_file, 'wb')
+        #     pickle.dump(i, opt)
+        #     opt.close()
+        #     # opt = open(opt_file, 'rb')
+        #     # bptree = pickle.load(opt)
+        #     # bptree.show()
+        # idx_pickle(self.bptree, self.idx)
+        # index_ed = time.time()
+        # print("index_time =", index_ed-data_ed, 's')
+        # self.bptree.node_tosave(self.idx)
 
-        bptree_idx = build_btree.BtreeIndex()
-        bptree_idx.load_index(self.idx)
 
-
+        # bptree_idx = build_btree.BtreeIndex()
+        # bptree_idx.load_index(self.idx)
 
 
 class Project:
@@ -100,7 +118,7 @@ class Project:
         self.opt = None
         self.idx = None
         self.file_name()
-        self._rank = 5
+        self._rank = 1024
 
     def __str__(self):
         return "Transform Result Path(Rank=%s):\nData:%s\nIndex:%s" % (self._rank, self.opt, self.idx)
@@ -129,8 +147,15 @@ class Project:
 
 
 if __name__ == '__main__':
-    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_100.txt"
+    # setrecursionlimit(100000)
+    # threading.stack_size(200000000)
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     path = "C:/Users/chenyujie/Desktop/Test"
-    project = Project(file, path)
-    project.do()
+    def main():
+        project = Project(file, path)
+        project.do()
+    main()
+    # thread = threading.Thread(target=main())
+    # thread.start()
+
 

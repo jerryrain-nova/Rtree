@@ -239,9 +239,9 @@ def rename_out(file, out_path):
     path = file.split('/')[-1]
     prefix = path.split('.')[:-1]
     prefix = '.'.join(prefix)
-    out_data = out_path + '/' + prefix + '_data.txt'
-    out_index = out_path + '/' + prefix + '_index.txt'
-    out_stat = out_path + '/' + prefix + '_stat.txt'
+    out_data = out_path + '/' + prefix + '.data'
+    out_index = out_path + '/' + prefix + '.index'
+    out_stat = out_path + '/' + prefix + '.stat'
     return out_data, out_index, out_stat
 
 
