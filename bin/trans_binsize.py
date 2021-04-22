@@ -46,7 +46,6 @@ def trans_bin(index_file, data_file, target):
             for block in blocks:
                 points = block.split(';')
                 for point in points:
-                    print(point)
                     gene, x, y, value = point.split(':')
                     if gene not in trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]].keys():
                         trans_data[trans_line_list[i]][trans_col_list[col_idx - 1]][gene] = 0

@@ -171,7 +171,7 @@ def column_cut_block(data, size=2000):
     data_col_single = column_cut_single(data)
     key_list = list(data_col_single.keys())[1:]
     each_stat = data_col_single['each_stat']
-    point_num= 0
+    point_num = 0
     init_lower, init_upper = list(map(int, key_list[0].split(':')))
     b_lower, b_upper = init_lower, init_upper
     block = []
@@ -247,8 +247,10 @@ def rename_out(file, out_path):
 
 if __name__ == '__main__':
     start_time = time.time()
-    file = argv[1]
-    out_path = argv[2]
+    # file = argv[1]
+    # out_path = argv[2]
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_100.txt"
+    out_path = "C:/Users/chenyujie/Desktop/Test"
     data_format, length_list = format(file)
     out, index, stat = rename_out(file, out_path)
     printf_data(data_format, index, out)

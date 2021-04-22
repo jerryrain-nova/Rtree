@@ -53,9 +53,9 @@ def format_data(data_file, data_info):
     data_stat = {'col': [0] * (last_colMBR_idx+1), 'line': [0] * (last_lineMBR_idx+1)}
     data_format = {}
     data_edge = {last_colMBR_idx: {}, last_lineMBR_idx: {}}
-    point = ipt.readline().strip()
+    point = ipt.readline()
     while point:
-        gene, x, y, value = point.split('\t')
+        gene, x, y, value = point.strip().split('\t')
         x, y = int(x), int(y)
         trans_x = int((x-min_x)/grid_size)
         trans_y = int((y-min_y)/grid_size)
@@ -75,7 +75,7 @@ def format_data(data_file, data_info):
         data_stat['col'][trans_x] += 1
         data_format[trans_y][trans_x].append(':'.join([gene, str(x), str(y), value]))
         data_format[trans_y][trans_x][0] += 1
-        point = ipt.readline().strip()
+        point = ipt.readline()
     return data_stat, data_format, data_edge
 
 
@@ -94,21 +94,6 @@ def data_merge(data_format, data_edge):
     return data_format
 
 
-def build_index(data_format, data_info, data_stat):
-    nz_col = data_info['nz_col']
-    nz_line = data_info['nz_line']
-    for query in [nz_line, nz_col]:
-        last_idx = init_idx = query[0]
-        opt_list = []
-        num = 0
-        for idx in query:
-            if idx - last_idx > 1:
-                opt_list.extend([init_idx, last_idx])
-                init_idx = idx
-                num += 1
-            last_idx = idx
-
-
 def printf_data(index_file, out_file, data_format, data_info, data_stat):
     opt = open(out_file, 'w')
     idx = open(index_file, 'w')
@@ -121,9 +106,12 @@ def printf_data(index_file, out_file, data_format, data_info, data_stat):
         bit = 0
         print(','.join(list(map(str, sorted(list(data_format[line].keys()))))), file=idx)
         for col in sorted(list(data_format[line].keys())):
-            print(';'.join(data_format[line][col][1:]), end=',', file=opt)
-            Bit += len(';'.join(data_format[line][col][1:]).encode()) + 1
-            bit += len(';'.join(data_format[line][col][1:]).encode()) + 1
+            bin_data = list(filter(None, data_format[line][col][1:]))
+            if bin_data is None:
+                continue
+            print(';'.join(bin_data), end=',', file=opt)
+            Bit += len(';'.join(bin_data).encode()) + 1
+            bit += len(';'.join(bin_data).encode()) + 1
             print(bit, end=',', file=idx)
         print('', file=idx)
         Bit_block.append(Bit)
@@ -134,7 +122,6 @@ def main(data_file, index_file, out_file, grid_size):
     data_info = matrix_info(data_file, grid_size)
     data_stat, data_format, data_edge = format_data(data_file, data_info)
     data_format = data_merge(data_format, data_edge)
-    # build_index(data_format, data_info, data_stat)
     printf_data(index_file, out_file, data_format, data_info, data_stat)
 
 

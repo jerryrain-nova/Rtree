@@ -3,13 +3,13 @@ from sys import argv
 
 
 def input_info(target):
-    target_line_range = target.split(',')[0]
-    target_col_range = target.split(',')[1]
+    target_col_range = target.split(',')[0]
+    target_line_range = target.split(',')[1]
     line_lower, line_upper = target_line_range.split(':')
     line_lower, line_upper = int(line_lower), int(line_upper)
     col_lower, col_upper = target_col_range.split(':')
     col_lower, col_upper = int(col_lower), int(col_upper)
-    return line_lower, line_upper, col_lower, col_upper
+    return col_lower, col_upper, line_lower, line_upper
 
 
 def get_search_target(lower, upper, index_list):
@@ -46,6 +46,7 @@ def get_search_target(lower, upper, index_list):
 
 def search_idx_range(index_file, target):
     index = open(index_file, 'r')
+    index.readline()
     line_index = list(map(int, index.readline().strip().split(':')))
     line_lower, line_upper, col_lower, col_upper = input_info(target)
     line_idx_range = get_search_target(line_lower, line_upper, line_index)
@@ -71,10 +72,10 @@ def search_idx_range(index_file, target):
     return data_range
 
 
-def get_data(data_file, data_range, target, size=2000):
+def get_data(data_file, data_range, target, size=256):
     data = open(data_file, 'r')
     data_target = []
-    line_lower, line_upper, col_lower, col_upper = input_info(target)
+    col_lower, col_upper, line_lower, line_upper = input_info(target)
     length = len(data_range)
     seek_time = 0
     seek_num = 0
