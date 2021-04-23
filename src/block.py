@@ -48,10 +48,12 @@ def sorted_by_y(rawdata_dict):
             y_idx += 1
             data_y[y_idx] = {}
         for col in rawdata_dict[y].keys():
-            if col not in data_y[y_idx]:
+            if col not in data_y[y_idx].keys():
                 data_y[y_idx][col] = []
             data_y[y_idx][col].extend(rawdata_dict[y][col])
         last_y = y
+        if y == y_list[-1]:
+            y_range.extend([init_y, last_y])
     return data_y, y_range
 
 
@@ -71,6 +73,7 @@ def format_data(data_y):
                 x_idx += 1
                 data_format[y_idx][x_idx] = []
             data_format[y_idx][x_idx].extend(data_y[y_idx][x])
+            num += len(data_y[y_idx][x])
             last_x = x
             if x == x_list[-1]:
                 data_format[y_idx]['x_range'].extend([init_x, last_x])
@@ -89,12 +92,12 @@ def printf_data(data_format, y_range, border, opt_data, opt_index):
         cout = []
         offset_list = [init]
         for x_idx in list(data_format[y_idx].keys())[1:]:
-            for point in data_format[y_idx][x_idx]:
-                cout.append(point)
-                offset += len(point.encode()) + 1
-                offset_list.append(offset)
+            grid = ','.join(data_format[y_idx][x_idx])
+            cout.append(grid)
+            offset += len(grid.encode()) + 1
+            offset_list.append(offset)
         print(','.join(cout), end=',', file=dt)
-        print(','.join(list(map(str, offset_list))), end=',\n', file=idx)
+        print(','.join(list(map(str, offset_list))), file=idx)
         init = offset
 
 

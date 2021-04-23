@@ -121,18 +121,18 @@ class Btree(object):
             return lf.par
         def insert_node(n):
             if not n.isleaf():
-                p = bisect_left(n.klist, key_word.klist)
+                p = bisect_left(n.klist, key_word.key)
                 if p == 0:
                     p = 1
-                    n.klist[0] = key_word.klist
+                    n.klist[0] = key_word.key
                 insert_node(n.ilist[p-1])
                 if n.isfull():
                     insert_node(split_node(n))
                     return
             else:
-                p = bisect_left(n.klist, key_word.klist)
-                n.klist.insert(p, key_word.klist)
-                n.vlist.insert(p, key_word.vlist)
+                p = bisect_left(n.klist, key_word.key)
+                n.klist.insert(p, key_word.key)
+                n.vlist.insert(p, key_word.value)
                 if n.isfull():
                     split_leaf(n)
         insert_node(node)

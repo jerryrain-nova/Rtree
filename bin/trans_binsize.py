@@ -125,6 +125,7 @@ def main(index_file, data_file, out_file, out_index_file, target):
 
 
 def rename(prefix, target, path):
+    prefix = prefix.split('_bin')[0]
     idx = path + '/' + prefix + '.index'
     dt = path + '/' + prefix + '.data'
     opt = path + '/' + prefix + '_bin' + str(target) + '.data'
