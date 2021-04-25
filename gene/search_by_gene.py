@@ -8,9 +8,8 @@ def search(target_que, data_file, index_file, out_file):
     opt = open(out_file, 'w')
     st = time.time()
     gene_list = idx.readline().strip().split(',')
-    print("gene_num = ", len(gene_list))
     site_list = idx.readline().strip().split(',')
-    print("index_time = ", time.time() - st)
+    print("index_time = ", time.time() - st, 's')
     seek_time = 0
     read_time = 0
     print_time = 0
@@ -49,14 +48,22 @@ def search(target_que, data_file, index_file, out_file):
 
 
 def target_list(target_file):
-    ipt = open(target_file, 'r')
-    que = ipt.readline().strip().split(',')
+    que = []
+    with open(target_file, 'r') as ipt:
+        for gene in ipt:
+            gene = gene.strip()
+            que.append(gene)
     return que
 
 
 def main(target_file, data_file, index_file, out_file):
+    st = time.time()
     target_que = target_list(target_file)
+    load_t = time.time()
+    print("load_target time =", load_t - st, 's')
     search(target_que, data_file, index_file, out_file)
+    ed = time.time()
+    print("run time =", ed-st, 's')
 
 
 if __name__ == '__main__':
