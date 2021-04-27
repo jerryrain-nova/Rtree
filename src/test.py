@@ -1,2 +1,3 @@
+from bisect import bisect_right
 a = [1,2,3]
-print(a[1:0])
+print(bisect_right(a, 0))

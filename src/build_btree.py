@@ -136,8 +136,9 @@ class Btree(object):
                 if n.isfull():
                     split_leaf(n)
         insert_node(node)
-    def search(self, mi=None, ma=None):
-        result = []
+    def search_continuous(self, mi=None, ma=None):
+        result_klist = []
+        result_vlist = []
         node = self._root
         leaf = self._leaf
         if mi is None and ma is None:
@@ -146,9 +147,7 @@ class Btree(object):
             raise ImportError('upper bound must be greater or equal than lower bound')
         def search_key(n, key):
             if n.isleaf():
-                p = bisect_left(n.klist, key)
-                if p == len(n.klist):
-                    p = p-1
+                p = bisect_right(n.klist, key)
                 return p, n
             else:
                 p = bisect_right(n.klist, key)
@@ -157,52 +156,110 @@ class Btree(object):
             while True:
                 for k in leaf.klist:
                     if k <= ma:
-                        result.append(k)
+                        result_klist.append(k)
+                        result_vlist.append(leaf.vlist[bisect_left(leaf.klist, k)])
                     else:
-                        return result
+                        return result_klist, result_vlist
                 if leaf.bro is None:
-                    return result
+                    return result_klist, result_vlist
                 else:
                     leaf = leaf.bro
         elif ma is None:
             index, leaf = search_key(node, mi)
-            result.extend(leaf.klist[index:])
+            result_klist.extend(leaf.klist[index:])
+            result_vlist.extend(leaf.vlist[index:])
             while True:
                 if leaf.bro is None:
-                    return result
+                    return result_klist, result_vlist
                 else:
                     leaf = leaf.bro
-                    result.extend(leaf.klist)
+                    result_klist.extend(leaf.klist)
+                    result_vlist.extend(leaf.vlist)
         else:
             if mi == ma:
                 index, leaf = search_key(node, mi)
                 try:
-                    if leaf.klist[index] == mi:
-                        result.append(leaf.klist[index])
-                        return result
+                    if leaf.klist[index-1] == mi:
+                        result_klist.append(leaf.klist[index-1])
+                        result_vlist.append(leaf.vlist[index-1])
+                        return result_klist, result_vlist
                     else:
-                        return result
+                        return result_klist, result_vlist
                 except IndexError:
-                    return result
+                    return result_klist, result_vlist
             else:
                 i1, l1 = search_key(node, mi)
                 i2, l2 = search_key(node, ma)
                 if l1 is l2:
                     if i1 == i2:
-                        return result
+                        return result_klist, result_vlist
                     else:
-                        result.extend(l1.klist[i1:i2 + 1])
-                        return result
+                        result_klist.extend(l1.klist[i1:i2])
+                        result_vlist.extend(l1.vlist[i1:i2])
+                        return result_klist, result_vlist
                 else:
-                    result.extend(l1.klist[i1:])
+                    result_klist.extend(l1.klist[i1:])
+                    result_vlist.extend(l1.vlist[i1:])
                     l = l1
                     while l.bro:
                         if l.bro == l2:
-                            result.extend(l2.klist[:i2 + 1])
-                            return result
+                            result_klist.extend(l2.klist[:i2])
+                            result_vlist.extend(l2.vlist[:i2])
+                            return result_klist, result_vlist
                         else:
-                            result.extend(l.bro.klist)
+                            result_klist.extend(l.bro.klist)
+                            result_vlist.extend(l.bro.vlist)
                             l = l.bro
+    def search_range(self, mi=None, ma=None, bit=None):
+        node = self._root
+        leaf = self._leaf
+        result_klist = []
+        result_vlist = []
+        if mi is None and ma is None or bit is None:
+            raise ImportError('you need to check out parameter')
+        elif mi is not None and ma is not None and mi > ma:
+            raise ImportError('upper bound must be greater or equal than lower bound')
+        def search_key(n, key):
+            if n.isleaf():
+                p = bisect_right(n.klist, key)
+                return p, n
+            else:
+                p = bisect_right(n.klist, key)
+                return search_key(n.ilist[p-1], key)
+        if mi is None:
+            ma_post = int(str(ma)[-bit:])
+            while True:
+                for k in leaf.klist:
+                    k_post = int(str(k)[-bit:])
+                    if k <= ma:
+                        if k_post <= ma_post:
+                            result_klist.append(k)
+                            result_vlist.append(leaf.vlist[bisect_left(leaf.klist, k)])
+                    else:
+                        return result_klist, result_vlist
+                if leaf.bro is None:
+                    return result_klist, result_klist
+                else:
+                    leaf = leaf.bro
+        if ma is None:
+            mi_post = int(str(mi)[-bit:])
+            index, leaf = search_key(node, mi)
+            for k in leaf.klist[index:]:
+                k_post = int(str(k)[-bit:])
+                if k_post >= mi_post:
+                    result_klist.append(k)
+                    result_vlist.append(leaf.vlist[bisect_left(leaf.klist, k)])
+            while True:
+                if leaf.bro is None:
+                    return result_klist, result_vlist
+                else:
+                    index_in_par = bisect_left(leaf.par.klist, leaf.klist[0])
+                    par_klist_post = list(map(lambda x: int(str(x)[-bit:]), leaf.par.klist[index_in_par+1:]))
+
+
+
+
+
     def show(self):
         print('this b+tree is:')
         q = deque()

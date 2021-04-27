@@ -126,9 +126,9 @@ def rename_out(ipt_file, opt_path):
 
 
 if __name__ == '__main__':
-    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w.txt"
-    # out_path = "C:/Users/chenyujie/Desktop/Test"
-    file = argv[1]
-    out_path = argv[2]
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    out_path = "C:/Users/chenyujie/Desktop/Test"
+    # file = argv[1]
+    # out_path = argv[2]
     f_data, f_index = rename_out(file, out_path)
     do(file, f_data, f_index)

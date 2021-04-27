@@ -131,7 +131,7 @@ def do(data_file, index_file, out_file, ipt_target):
     print("load_index time =", index_t-st, 's')
     dt_search = load_data(data_file, idx_range, ipt_target)
     search_t = time()
-    print("search time =", search_t-index_t, 's')
+    print("search time =", search_t-st, 's')
     printf_dt(dt_search, out_file)
     print_t = time()
     print("print time =", print_t-search_t, 's')
@@ -139,10 +139,10 @@ def do(data_file, index_file, out_file, ipt_target):
 
 
 if __name__ == '__main__':
-    file_path = argv[1]
-    target = argv[2]
-    # file_path = "C:/Users/chenyujie/Desktop/Test/new_spatial_1w"
-    # target = "2600:5200,4500:6500"
+    # file_path = argv[1]
+    # target = argv[2]
+    file_path = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw"
+    target = "4000:12000,4000:12000"
     index = file_path + '.index'
     data = file_path + '.data'
     out = file_path + '.search'
