@@ -210,55 +210,6 @@ class Btree(object):
                             result_klist.extend(l.bro.klist)
                             result_vlist.extend(l.bro.vlist)
                             l = l.bro
-    def search_range(self, mi=None, ma=None, bit=None):
-        node = self._root
-        leaf = self._leaf
-        result_klist = []
-        result_vlist = []
-        if mi is None and ma is None or bit is None:
-            raise ImportError('you need to check out parameter')
-        elif mi is not None and ma is not None and mi > ma:
-            raise ImportError('upper bound must be greater or equal than lower bound')
-        def search_key(n, key):
-            if n.isleaf():
-                p = bisect_right(n.klist, key)
-                return p, n
-            else:
-                p = bisect_right(n.klist, key)
-                return search_key(n.ilist[p-1], key)
-        if mi is None:
-            ma_post = int(str(ma)[-bit:])
-            while True:
-                for k in leaf.klist:
-                    k_post = int(str(k)[-bit:])
-                    if k <= ma:
-                        if k_post <= ma_post:
-                            result_klist.append(k)
-                            result_vlist.append(leaf.vlist[bisect_left(leaf.klist, k)])
-                    else:
-                        return result_klist, result_vlist
-                if leaf.bro is None:
-                    return result_klist, result_klist
-                else:
-                    leaf = leaf.bro
-        if ma is None:
-            mi_post = int(str(mi)[-bit:])
-            index, leaf = search_key(node, mi)
-            for k in leaf.klist[index:]:
-                k_post = int(str(k)[-bit:])
-                if k_post >= mi_post:
-                    result_klist.append(k)
-                    result_vlist.append(leaf.vlist[bisect_left(leaf.klist, k)])
-            while True:
-                if leaf.bro is None:
-                    return result_klist, result_vlist
-                else:
-                    index_in_par = bisect_left(leaf.par.klist, leaf.klist[0])
-                    par_klist_post = list(map(lambda x: int(str(x)[-bit:]), leaf.par.klist[index_in_par+1:]))
-
-
-
-
 
     def show(self):
         print('this b+tree is:')

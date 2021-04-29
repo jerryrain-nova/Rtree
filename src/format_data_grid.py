@@ -119,10 +119,16 @@ def printf_data(index_file, out_file, data_format, data_info, data_stat):
 
 
 def main(data_file, index_file, out_file, grid_size):
+    st = time.time()
     data_info = matrix_info(data_file, grid_size)
     data_stat, data_format, data_edge = format_data(data_file, data_info)
     data_format = data_merge(data_format, data_edge)
+    load_format_t = time.time()
     printf_data(index_file, out_file, data_format, data_info, data_stat)
+    ed = time.time()
+    print("load&format time =", load_format_t-st, 's')
+    print("print_time =", ed-load_format_t, 's')
+    print("run_time =", ed-st, 's')
 
 
 def rename_out(input_file, opt_path):
@@ -143,7 +149,4 @@ if __name__ == '__main__':
     out_path = argv[2]
     grid = int(argv[3])
     out, index = rename_out(file, out_path)
-    st = time.time()
     main(file, index, out, grid)
-    ed = time.time()
-    print("run_time = ", ed-st, 's')

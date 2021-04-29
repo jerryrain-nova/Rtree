@@ -1,4 +1,5 @@
 from sys import argv
+import time
 
 
 def load_data(input_file):
@@ -33,10 +34,9 @@ def classify(data_dict):
             if gene_prefix == gene:
                 gene_dict[gene_prefix] = [gene]
                 gene_dict['same'].append(gene)
-    print(gene_dict.keys())
 
 
-def format_data(data_dict, out_file, index_file, gene_file):
+def printf_data(data_dict, out_file, index_file, gene_file):
     output = open(out_file, 'w')
     idx = open(index_file, 'w')
     gl = open(gene_file, 'w')
@@ -52,9 +52,17 @@ def format_data(data_dict, out_file, index_file, gene_file):
 
 
 def main(input_file, out_file, index_file, gene_file):
+    st = time.time()
     data = load_data(input_file)
+    load_t = time.time()
     classify(data)
-    format_data(data, out_file, index_file, gene_file)
+    format_t = time.time()
+    printf_data(data, out_file, index_file, gene_file)
+    ed = time.time()
+    print("load_time =", load_t-st, 's')
+    print("format_time =", format_t-load_t, 's')
+    print("print_time =", ed-format_t, 's')
+    print("run_time =", ed-st)
 
 
 if __name__ == '__main__':

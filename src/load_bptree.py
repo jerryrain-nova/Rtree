@@ -2,7 +2,27 @@ from sys import argv
 from src import build_btree
 from struct import pack
 import time
+import numpy as np
 from bisect import bisect_left, bisect_right
+
+
+class ResultIter:
+    def __init__(self, klist, vlist):
+        self.klist = klist
+        self.vlist = vlist
+        self.i = 0
+        self.len = len(self.klist)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.i < self.len:
+            ret = str(self.klist[self.i]) + self.vlist[self.i]
+            self.i += 1
+            return ret
+        else:
+            raise StopIteration()
 
 
 class DataKey:
@@ -76,6 +96,11 @@ class DataKey:
         primekey = query[0] + query[1]
         return int(primekey)
 
+    def split_primekey(self, primekey):
+        primekey = str(primekey)
+        pre, post = primekey[:-self._bit], primekey[-self._bit:]
+        return pre, str(int(post))
+
     def build_bptree(self):
         st = time.time()
         self.bptree = build_btree.Btree(self.rank)
@@ -90,44 +115,41 @@ class DataKey:
         # self.bptree.leaf_tosave(self.opt)
         data_ed = time.time()
         print("height =", self.bptree.H)
-        print("save_data =", data_ed-build_ed, 's')
+        # print("save_data =", data_ed-build_ed, 's')
         # self.bptree.show()
 
     def search_bptree(self, ipt_target):
-        st = time.time()
         x_min, x_max = ipt_target.split(',')[0].split(':')
         y_min, y_max = ipt_target.split(',')[1].split(':')
-        # mi = self.primekey(x_min, y_min)
-        # ma = self.primekey(x_max, y_max)
         x_min, x_max, y_min, y_max = int(x_min), int(x_max), int(y_min), int(y_max)
-        # print(mi, ma)
         _result_klist, _result_vlist = [], []
-        x_lf = bisect_left(self.x_list, x_min)
-        x_rh = bisect_right(self.x_list, x_max) - 1
-        x_range = self.x_list[x_lf:x_rh+1]
-        for x in x_range:
+        for x in range(x_min, x_max+1):
             mi = self.primekey(str(x), str(y_min))
             ma = self.primekey(str(x), str(y_max))
             result_klist, result_vlist = self.bptree.search_continuous(mi, ma)
             _result_klist.extend(result_klist)
             _result_vlist.extend(result_vlist)
+        return _result_klist, _result_vlist
 
-        def filter_result(klist, vlist):
-            _result_klist, _result_vlist = [], []
-            for i in range(len(klist)):
-                key_y = int(str(klist[i])[-self._bit:])
-                if y_min <= key_y <= y_max:
-                    _result_klist.append(klist[i])
-                    _result_vlist.append(vlist[i])
-            return _result_klist, _result_klist
-        # _result_klist, _result_vlist = filter_result(result_klist, result_vlist)
+    def printf_result(self, opt_file, _result_klist, _result_vlist):
+        opt = open(opt_file, 'w')
+        # _result_klist = list(map(lambda x: ':'.join(self.split_primekey(x)), _result_klist))
+        cache = []
+        split_time = 0
+        for i in range(len(_result_vlist)):
+            st = time.time()
+            pre, post = self.split_primekey(_result_klist[i])
+            split_time += time.time()-st
+            one_tip = pre + ':' + post + ':' + _result_vlist[i]
+            cache.append(one_tip)
+        print('\n'.join(cache), file=opt)
+        print("\tsplit_time =", split_time, 's')
 
-        ed = time.time()
-        print("\tfilter_time =", ed-st, 's')
-        # print(_result_klist)
-        # print(_result_vlist)
-        # print(result_klist)
-        # print(result_vlist)
+        # result_print = ResultIter(_result_klist, _result_vlist)
+        # for i in result_print:
+        #     print(i, file=opt)
+        # print(_result_klist, file=opt)
+        # print(_result_vlist, file=opt)
 
 
 class Project:
@@ -135,13 +157,14 @@ class Project:
         self.file = ipt
         self.path = pt
         self.target = tg
-        self.opt = None
+        self.dt = None
         self.idx = None
+        self.opt = None
         self.file_name()
         self._rank = 256
 
     def __str__(self):
-        return "Transform Result Path(Rank=%s):\nData:%s\nIndex:%s" % (self._rank, self.opt, self.idx)
+        return "Transform Result Path(Rank=%s):\nData:%s\nIndex:%s" % (self._rank, self.dt, self.idx)
 
     @property
     def rank(self):
@@ -149,31 +172,35 @@ class Project:
 
     def file_name(self):
         prefix = self.file.split('/')[-1].split('.')[0]
-        self.opt = self.path + '/' + prefix + '.data'
+        self.dt = self.path + '/' + prefix + '.data'
         self.idx = self.path + '/' + prefix + '.index'
+        self.opt = self.path + '/' + prefix + '.search'
 
     def do(self):
         st = time.time()
-        projectA = DataKey(self.file, self.opt, self.idx, self.rank)
+        projectA = DataKey(self.file, self.dt, self.idx, self.rank)
         init_ed = time.time()
         projectA.load()
         load_ed = time.time()
         projectA.build_bptree()
         build_ed = time.time()
-        projectA.search_bptree(self.target)
+        _result_klist, _result_vlist = projectA.search_bptree(self.target)
+        search_ed = time.time()
+        projectA.printf_result(self.opt, _result_klist, _result_vlist)
         ed = time.time()
         print(projectA.border_print)
         print("init_time =", init_ed-st, 's')
         print("load_time =", load_ed-init_ed, 's')
         print("build_time =", build_ed-load_ed, 's')
-        print("search_time =", ed - build_ed, 's')
+        print("search_time =", search_ed - build_ed, 's')
+        print("print_time =", ed-search_ed, 's')
         print("run_time =", ed-st, 's')
 
 
 if __name__ == '__main__':
     file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     path = "C:/Users/chenyujie/Desktop/Test"
-    target = "4000:12000,4000:12000"
+    target = "2300:16000,1900:16000"
 
     def main():
         project = Project(file, path, target)
