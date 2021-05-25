@@ -514,6 +514,7 @@ class Project:
         search_ed = time.time()
         projectA.printf_result(self.opt, _result_klist, _result_vlist)
         ed = time.time()
+
         print(projectA.border_print)
         print("init_time =", init_ed-st, 's')
         print("load_time =", load_ed-init_ed, 's')
@@ -524,12 +525,12 @@ class Project:
 
 
 if __name__ == '__main__':
-    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    # path = "C:/Users/chenyujie/Desktop/Test"
-    # target = "2300:16000,1900:16000"
-    file = argv[1]
-    path = argv[2]
-    target = argv[3]
+    file = "C:/Users/Nova/Desktop/Test_Data/new_spatial_1kw.txt"
+    path = "C:/Users/Nova/Desktop/Test_Data"
+    target = "2300:16000,1900:16000"
+    # file = argv[1]
+    # path = argv[2]
+    # target = argv[3]
 
     def main():
         project = Project(file, path, target)
