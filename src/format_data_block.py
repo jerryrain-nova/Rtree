@@ -138,8 +138,8 @@ def rename_out(ipt_file, opt_path):
 
 
 if __name__ == '__main__':
-    file = "C:/Users/Nova/Desktop/Test_Data/FP200000289TR_A2_1M.txt"
-    out_path = "C:/Users/Nova/Desktop/Test_Data"
+    file = "C:/Users/chenyujie/Desktop/Test/FP200000289TR_A2_1M.txt"
+    out_path = "C:/Users/chenyujie/Desktop/Test"
     # file = sys.argv[1]
     # out_path = sys.argv[2]
     f_data, f_index = rename_out(file, out_path)
