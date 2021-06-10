@@ -114,6 +114,7 @@ class Data:
 
         sorted_idx = np.asarray(list(chain(*self.sorted_idx_part)), dtype=np.uint32)
         self.y_index = self.y_index[y_cutted_idx]
+
         self.y = self.y[sorted_idx]
         self.x = self.x[sorted_idx]
         self.gene = self.gene[sorted_idx]

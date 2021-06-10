@@ -21,12 +21,11 @@ class test:
     def insert(self, l):
         self.data.append(l)
 
-n = 3
-print(n//3)
 
-t = test()
-a = [0, 1, 2, 3, 4, 5, 6]
-for i in a:
-    t.insert(i)
-for x in t:
-    print(x)
+a = []
+b = ''
+for i in range(5):
+    a.append(i)
+b += "a"
+print("a size = ", getsizeof(a))
+print("b size = ", getsizeof(b))
