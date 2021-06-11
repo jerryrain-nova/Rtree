@@ -11,10 +11,24 @@ def reload(file):
     f = open(file, 'r')
     print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
-    gt = f.readlines()
+    gl = [''] * 1000000
+
+    def find_l(ipt, t):
+        for i in range(t):
+            if i == t-1:
+                print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+                re = ipt.readline().strip()
+                ipt.seek(0)
+                return re
+            ipt.readline()
+    re = find_l(f, 100)
+    gl[9999] = re
+    re = find_l(f, 100)
+    gl[9998] = re
+    print(gl[9998:10000])
     print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
-    print("gene_list memory = %.4f MB " % (getsizeof(gt) / 1024 / 1024))
+    print("gene_list memory = %.4f MB " % (getsizeof(gl) / 1024 / 1024))
     print("run time = ", time()-st, 's')
 
 
