@@ -158,9 +158,6 @@ class Data:
         gene_list = sorted(set(self.gene))
         geneDict = {}.fromkeys(gene_list)
 
-        cell_list = sorted(set(self.cell))
-        cellDict = {}.fromkeys(cell_list)
-
         for block in blocks:
             points = []
             if d <= blocks_num[idx]:
@@ -199,7 +196,7 @@ def load_data(file):
     ipt = open(file, 'r')
     ipt.readline()
     point = ipt.readline()
-    gene, x, y, value= point.strip().split('\t')
+    gene, x, y, value = point.strip().split('\t')
     data = Data(gene, int(x), int(y), value)
     point = ipt.readline()
     while point:
@@ -221,10 +218,10 @@ def rename_out(ipt_file, opt_path):
 
 def main():
     st = time()
-    # file = "C:/Users/chenyujie/Desktop/Test/Cell_sample_1M.txt"
-    # out_path = "C:/Users/chenyujie/Desktop/Test"
-    file = argv[1]
-    out_path = argv[2]
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    out_path = "C:/Users/chenyujie/Desktop/Test"
+    # file = argv[1]
+    # out_path = argv[2]
     f_data, f_index, f_gene = rename_out(file, out_path)
     data = load_data(file)
     load_t = time()

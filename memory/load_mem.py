@@ -1,5 +1,9 @@
 from sys import argv
 from time import time
+from sys import getsizeof
+import os
+import psutil
+import numpy as np
 
 
 def load(file, opt_path):
@@ -16,8 +20,9 @@ def load(file, opt_path):
         xtf = opt_path + '/' + prefix + '.x_tmp'
         ytf = opt_path + '/' + prefix + '.y_tmp'
         vtf = opt_path + '/' + prefix + '.v_tmp'
-        return gtf, xtf, ytf, vtf
-    gtf, xtf, ytf, vtf = rename_out(file, opt_path)
+        return [gtf, xtf, ytf, vtf]
+    _tmp = rename_out(file, opt_path)
+    gtf, xtf, ytf, vtf = _tmp
     gt = open(gtf, 'w')
     xt = open(xtf, 'w')
     yt = open(ytf, 'w')
@@ -34,6 +39,15 @@ def load(file, opt_path):
         vc += value + ','
         i += 1
 
+        point = dt.readline()
+
+        if not point:
+            print(gc[:-1], end='', file=gt)
+            print(xc[:-1], end='', file=xt)
+            print(yc[:-1], end='', file=yt)
+            print(vc[:-1], end='', file=vt)
+            break
+
         if i == 32:
             print(gc, end='', file=gt)
             print(xc, end='', file=xt)
@@ -42,8 +56,22 @@ def load(file, opt_path):
             gc = xc = yc = vc = ''
             i = 0
 
-        point = dt.readline()
     print("run time = ", time()-st, 's')
+    return _tmp
+
+
+def read(_tmp):
+    st = time()
+    gtf, xtf, ytf, vtf = _tmp
+    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+    # with open(gtf, 'r') as gt, open(xtf, 'r') as xt, open(ytf, 'r') as yt, open(vtf, 'r') as vt:
+    #     yl = yt.readline().strip().split(',')[:-1]
+    #     print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+    y = np.loadtxt(ytf, dtype=np.uint32, delimiter=',')
+    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+    # del y
+    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+    print("Read_Mod run time = ", time()-st, 's')
 
 
 def main():
@@ -51,7 +79,8 @@ def main():
     # opt_path = argv[2]
     file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     opt_path = "C:/Users/chenyujie/Desktop/Test"
-    load(file, opt_path)
+    _tmp = load(file, opt_path)
+    read(_tmp)
 
 
 if __name__ == '__main__':

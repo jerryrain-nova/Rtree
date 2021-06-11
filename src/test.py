@@ -21,11 +21,10 @@ class test:
     def insert(self, l):
         self.data.append(l)
 
-
-a = []
-b = ''
-for i in range(5):
-    a.append(i)
-b += "a"
-print("a size = ", getsizeof(a))
-print("b size = ", getsizeof(b))
+a = [3, 1, 4, 2, 5]
+ai = [1, 3, 0, 2, 4]
+def argsort(l , il):
+    for i in range(len(l)):
+        il[i] = l[il[i]]
+    return il
+print(argsort(a, ai))
