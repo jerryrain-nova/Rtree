@@ -9,6 +9,8 @@ import numpy as np
 def load(file, opt_path):
     st = time()
 
+    gd = {}
+
     dt = open(file, 'r')
     dt.readline()
 
@@ -31,17 +33,25 @@ def load(file, opt_path):
     gc = xc = yc = vc = ''
     i = 0
     point = dt.readline()
+    idx = 0
     while point:
         gene, x, y, value = point.strip().split('\t')
-        gc += gene + ','
-        xc += x + ','
-        yc += y + ','
-        vc += value + ','
+
+        if gene not in gd:
+            gd[gene] = str(idx)
+            idx += 1
+
+        gc += gd[gene] + '\n'
+        xc += x + '\n'
+        yc += y + '\n'
+        vc += value + '\n'
         i += 1
 
         point = dt.readline()
 
         if not point:
+            print("gene_dict memory = ", getsizeof(gd) / 1024 / 1024)
+            print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
             print(gc[:-1], end='', file=gt)
             print(xc[:-1], end='', file=xt)
             print(yc[:-1], end='', file=yt)
@@ -60,27 +70,14 @@ def load(file, opt_path):
     return _tmp
 
 
-def read(_tmp):
-    st = time()
-    gtf, xtf, ytf, vtf = _tmp
-    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
-    # with open(gtf, 'r') as gt, open(xtf, 'r') as xt, open(ytf, 'r') as yt, open(vtf, 'r') as vt:
-    #     yl = yt.readline().strip().split(',')[:-1]
-    #     print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
-    y = np.loadtxt(ytf, dtype=np.uint32, delimiter=',')
-    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
-    # del y
-    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
-    print("Read_Mod run time = ", time()-st, 's')
-
-
 def main():
     # file = argv[1]
     # opt_path = argv[2]
-    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    opt_path = "C:/Users/chenyujie/Desktop/Test"
+    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    # opt_path = "C:/Users/chenyujie/Desktop/Test"
+    file = "/mnt/c/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    opt_path = "/mnt/c/Users/chenyujie/Desktop/Test"
     _tmp = load(file, opt_path)
-    read(_tmp)
 
 
 if __name__ == '__main__':

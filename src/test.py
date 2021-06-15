@@ -1,5 +1,8 @@
 import numpy as np
 from sys import getsizeof
+import psutil
+import os
+
 
 class test:
     def __init__(self):
@@ -21,10 +24,18 @@ class test:
     def insert(self, l):
         self.data.append(l)
 
-a = [3, 1, 4, 2, 5]
-ai = [1, 3, 0, 2, 4]
-def argsort(l , il):
-    for i in range(len(l)):
-        il[i] = l[il[i]]
-    return il
-print(argsort(a, ai))
+
+file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.y_tmp"
+f = open(file, 'r')
+print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+a = np.zeros(10000000).astype(np.uint32)
+print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+for i in range(10000000):
+    a[i] = int(f.readline().strip())
+    print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+    if i == 10000000-1:
+        print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+print(a)
+print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+
+
