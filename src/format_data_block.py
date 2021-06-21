@@ -1,7 +1,6 @@
 import sys
 import psutil
 import os
-import gc
 from time import time
 
 
@@ -109,22 +108,20 @@ def do(ipt_file, opt_data, opt_index):
     rawdata_dict, border = load_rawdata(ipt_file)
     load_t = time()
     print("load_data time =", load_t-st, 's')
-    print(psutil.virtual_memory())
-    print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
+    # print(psutil.virtual_memory())
+    # print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
     data_y, y_range = sorted_by_y(rawdata_dict)
     del rawdata_dict
-    gc.collect()
     data_format = format_data(data_y)
     del data_y
-    gc.collect()
     format_t = time()
     print("format_data time =", format_t-load_t, 's')
-    print(psutil.virtual_memory())
-    print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
+    # print(psutil.virtual_memory())
+    # print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
     printf_data(data_format, y_range, border, opt_data, opt_index)
     print_t = time()
     print("print time =", print_t-format_t, 's')
-    print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
+    # print("memory use =", psutil.Process(os.getpid()).memory_info().rss)
     print("run time =", print_t-st, 's')
 
 
@@ -138,7 +135,7 @@ def rename_out(ipt_file, opt_path):
 
 
 if __name__ == '__main__':
-    file = "C:/Users/chenyujie/Desktop/Test/FP200000289TR_A2_1M.txt"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     out_path = "C:/Users/chenyujie/Desktop/Test"
     # file = sys.argv[1]
     # out_path = sys.argv[2]

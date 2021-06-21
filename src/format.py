@@ -2,45 +2,46 @@ from sys import argv
 from time import time
 import numpy as np
 from sys import getsizeof
+import gzip
 import os
-# import psutil
+import psutil
 
-
-def load(file, _tmp):
-    st = time()
-    gtf, xtf, ytf, vtf = _tmp
-
-    with open(file, 'r') as dt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf, 'w') as vt:
-        dt.readline()
-
-        gc = xc = yc = vc = ''
-        point = dt.readline()
-        i = 0
-        while point:
-            gene, x, y, value = point.strip().split('\t')
-
-            gc += gene + ','
-            xc += x + ','
-            yc += y + ','
-            vc += value + ','
-            i += 1
-            point = dt.readline()
-
-            if not point:
-                print(gc[:-1], end='', file=gt)
-                print(xc[:-1], end='', file=xt)
-                print(yc[:-1], end='', file=yt)
-                print(vc[:-1], end='', file=vt)
-                break
-
-            if i == 32:
-                print(gc, end='', file=gt)
-                print(xc, end='', file=xt)
-                print(yc, end='', file=yt)
-                print(vc, end='', file=vt)
-                gc = xc = yc = vc = ''
-                i = 0
-    print("load time = ", time()-st, 's')
+#
+# def load(file, _tmp):
+#     st = time()
+#     gtf, xtf, ytf, vtf = _tmp
+#
+#     with open(file, 'r') as dt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf, 'w') as vt:
+#         dt.readline()
+#
+#         gc = xc = yc = vc = ''
+#         point = dt.readline()
+#         i = 0
+#         while point:
+#             gene, x, y, value = point.strip().split('\t')
+#
+#             gc += gene + ','
+#             xc += x + ','
+#             yc += y + ','
+#             vc += value + ','
+#             i += 1
+#             point = dt.readline()
+#
+#             if not point:
+#                 print(gc[:-1], end='', file=gt)
+#                 print(xc[:-1], end='', file=xt)
+#                 print(yc[:-1], end='', file=yt)
+#                 print(vc[:-1], end='', file=vt)
+#                 break
+#
+#             if i == 32:
+#                 print(gc, end='', file=gt)
+#                 print(xc, end='', file=xt)
+#                 print(yc, end='', file=yt)
+#                 print(vc, end='', file=vt)
+#                 gc = xc = yc = vc = ''
+#                 i = 0
+#     print("load time = ", time()-st, 's')
 
 
 class Data:
@@ -58,6 +59,57 @@ class Data:
 
         with open(file, 'r') as dt, open(gdf, 'w') as gdt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf,
                                                                                                            'w') as vt:
+            dt.readline()
+            gd = {}
+            gc = xc = yc = vc = ''
+            point = dt.readline()
+            i = 0
+            g_idx = 0
+            while point:
+                gene, x, y, value = point.strip().split('\t')
+                if gene not in gd:
+                    gd[gene] = str(g_idx)
+                    g_idx += 1
+                gc += gd[gene] + '\n'
+                xc += x + '\n'
+                yc += y + '\n'
+                vc += value + '\n'
+                self.num += 1
+                i += 1
+                point = dt.readline()
+                if not point:
+                    # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+                    print(gc, end='', file=gt)
+                    print(xc, end='', file=xt)
+                    print(yc, end='', file=yt)
+                    print(vc, end='', file=vt)
+                    break
+
+                if i == self.circle_t:
+                    print(gc, end='', file=gt)
+                    print(xc, end='', file=xt)
+                    print(yc, end='', file=yt)
+                    print(vc, end='', file=vt)
+                    gc = xc = yc = vc = ''
+                    i = 0
+
+            self.g_num = g_idx
+            gc = ''
+            i = 0
+            for key in gd.keys():
+                gc += key + '\n'
+                i += 1
+                if i == self.circle_t:
+                    print(gc, end='', file=gdt)
+                    gc = ''
+            print(gc, end='', file=gdt)
+        print("load time = ", time() - st, 's')
+
+    def load_gzip(self, file):
+        st = time()
+        gdf, gtf, xtf, ytf, vtf = self._tmp
+
+        with gzip.open(file, 'rt') as dt, open(gdf, 'w') as gdt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf, 'w') as vt:
             dt.readline()
             gd = {}
             gc = xc = yc = vc = ''
@@ -276,15 +328,16 @@ def remove_tmp(_tmp):
 
 def main():
     st = time()
-    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    # opt_path = "C:/Users/chenyujie/Desktop/Test"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt.gz"
+    # file = "C:/Users/chenyujie/Desktop/Test/FP200000510BL_A6.head.gem"
+    opt_path = "C:/Users/chenyujie/Desktop/Test"
     # file = "/mnt/c/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     # opt_path = "/mnt/c/Users/chenyujie/Desktop/Test"
-    file = argv[1]
-    opt_path = argv[2]
+    # file = argv[1]
+    # opt_path = argv[2]
     _tmp, _opt = rename_out(file, opt_path)
     data = Data(_tmp)
-    data.load(file)
+    data.load_gzip(file)
     data.sort_and_block()
     data.printf(_opt)
     remove_tmp(_tmp)

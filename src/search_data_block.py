@@ -139,10 +139,10 @@ def do(data_file, index_file, out_file, ipt_target):
 
 
 if __name__ == '__main__':
-    # file_path = argv[1]
-    # target = argv[2]
-    file_path = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw"
-    target = "2300:16000,1900:16000"
+    file_path = argv[1]
+    target = argv[2]
+    # file_path = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw"
+    # target = "2300:16000,1900:16000"
     index = file_path + '.index'
     data = file_path + '.data'
     out = file_path + '.search'
