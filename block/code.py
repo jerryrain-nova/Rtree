@@ -2,8 +2,8 @@ from sys import argv
 from time import time
 import numpy as np
 from sys import getsizeof
+import gzip
 import os
-# import psutil
 
 
 def load(file, _tmp):
@@ -58,7 +58,68 @@ class Data:
 
         with open(file, 'r') as dt, open(gdf, 'w') as gdt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf,
                                                                                                            'w') as vt:
-            dt.readline()
+            header = dt.readline()
+            while header:
+                if '#' in header.strip():
+                    header = dt.readline()
+                else:
+                    break
+            gd = {}
+            gc = xc = yc = vc = ''
+            point = dt.readline()
+            i = 0
+            g_idx = 0
+            while point:
+                gene, x, y, value = point.strip().split('\t')
+                if gene not in gd:
+                    gd[gene] = str(g_idx)
+                    g_idx += 1
+                gc += gd[gene] + '\n'
+                xc += x + '\n'
+                yc += y + '\n'
+                vc += value + '\n'
+                self.num += 1
+                i += 1
+                point = dt.readline()
+                if not point:
+                    # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+                    print(gc, end='', file=gt)
+                    print(xc, end='', file=xt)
+                    print(yc, end='', file=yt)
+                    print(vc, end='', file=vt)
+                    break
+
+                if i == self.circle_t:
+                    print(gc, end='', file=gt)
+                    print(xc, end='', file=xt)
+                    print(yc, end='', file=yt)
+                    print(vc, end='', file=vt)
+                    gc = xc = yc = vc = ''
+                    i = 0
+
+            self.g_num = g_idx
+            gc = ''
+            i = 0
+            for key in gd.keys():
+                gc += key + '\n'
+                i += 1
+                if i == self.circle_t:
+                    print(gc, end='', file=gdt)
+                    gc = ''
+            print(gc, end='', file=gdt)
+        print("load time = ", time() - st, 's')
+
+    def load_gzip(self, file):
+        st = time()
+        gdf, gtf, xtf, ytf, vtf = self._tmp
+
+        with gzip.open(file, 'rt') as dt, open(gdf, 'w') as gdt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf, 'w') as vt:
+            header = dt.readline()
+            while header:
+                if '#' in header.strip():
+                    header = dt.readline()
+                else:
+                    break
             gd = {}
             gc = xc = yc = vc = ''
             point = dt.readline()
@@ -164,14 +225,12 @@ class Data:
     def sort_and_block(self):
         st = time()
         gdf, gtf, xtf, ytf, vtf = self._tmp
-        # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
         t1 = time()
         yl_r = self.load_tmp(ytf, 32)
         xl_r = self.load_tmp(xtf, 32)
 
         print("\treload_time = ", time()-t1, 's')
-        # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
         s_i = yl_r.argsort().astype(np.uint32)
         xl_s = xl_r[s_i]
@@ -190,7 +249,6 @@ class Data:
             self.b_i.append(self.cut_block(xr))
             s_i[yl_c[i]:yl_c[i+1]+1] = s_i[yl_c[i]:yl_c[i+1]+1][r_s_i]
         del i, xr, r_s_i, xl_s, yl_c
-        # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
         yl = yl_r[s_i]
         self.write_tmp(ytf, yl)
@@ -207,7 +265,6 @@ class Data:
         self.write_tmp(gtf, gl)
         del gl_r, gl
 
-        # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
         print("sort time = ", time()-st, 's')
 
     def printf(self, _opt):
@@ -254,6 +311,9 @@ class Data:
         print("print time = ", time()-st, 's')
 
 
+
+
+
 def rename_out(ipt_file, opt_path):
     path = ipt_file.split('/')[-1]
     prefix = path.split('.')[:-1]
@@ -274,17 +334,23 @@ def remove_tmp(_tmp):
         os.remove(file)
 
 
+def isgzip(file):
+    if '.gz' in file:
+        return True
+    else:
+        return False
+
+
 def main():
     st = time()
-    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    # opt_path = "C:/Users/chenyujie/Desktop/Test"
-    # file = "/mnt/c/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    # opt_path = "/mnt/c/Users/chenyujie/Desktop/Test"
     file = argv[1]
     opt_path = argv[2]
     _tmp, _opt = rename_out(file, opt_path)
     data = Data(_tmp)
-    data.load(file)
+    if isgzip(file):
+        data.load_gzip(file)
+    else:
+        data.load(file)
     data.sort_and_block()
     data.printf(_opt)
     remove_tmp(_tmp)

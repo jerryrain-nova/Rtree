@@ -6,43 +6,6 @@ import os
 # import psutil
 
 
-def load(file, _tmp):
-    st = time()
-    gtf, xtf, ytf, vtf = _tmp
-
-    with open(file, 'r') as dt, open(gtf, 'w') as gt, open(xtf, 'w') as xt, open(ytf, 'w') as yt, open(vtf, 'w') as vt:
-        dt.readline()
-
-        gc = xc = yc = vc = ''
-        point = dt.readline()
-        i = 0
-        while point:
-            gene, x, y, value = point.strip().split('\t')
-
-            gc += gene + ','
-            xc += x + ','
-            yc += y + ','
-            vc += value + ','
-            i += 1
-            point = dt.readline()
-
-            if not point:
-                print(gc[:-1], end='', file=gt)
-                print(xc[:-1], end='', file=xt)
-                print(yc[:-1], end='', file=yt)
-                print(vc[:-1], end='', file=vt)
-                break
-
-            if i == 32:
-                print(gc, end='', file=gt)
-                print(xc, end='', file=xt)
-                print(yc, end='', file=yt)
-                print(vc, end='', file=vt)
-                gc = xc = yc = vc = ''
-                i = 0
-    print("load time = ", time()-st, 's')
-
-
 class Data:
     def __init__(self, _tmp):
         self.xmax = self.xmin = self.ymax = self.ymin = self.yl_c = None
@@ -219,14 +182,12 @@ class Data:
             print(','.join([self.xmin, self.xmax, self.ymin, self.ymax]), file=it)
             print(':'.join(list(map(str, self.yl_c.tolist()))), file=it)
             bit = 0
-            sum = 0
             for y_b in self.b_i:
                 cout = ''
                 x_l = []
                 off_l = [str(bit)]
                 for i in range(len(y_b)-1):
                     num = y_b[i+1]-y_b[i]
-                    sum += num
                     for j in range(num):
                         g = gd[gt.readline().strip()]
                         y = yt.readline().strip()
@@ -276,18 +237,18 @@ def remove_tmp(_tmp):
 
 def main():
     st = time()
-    # file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
-    # opt_path = "C:/Users/chenyujie/Desktop/Test"
+    file = "C:/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
+    opt_path = "C:/Users/chenyujie/Desktop/Test"
     # file = "/mnt/c/Users/chenyujie/Desktop/Test/new_spatial_1kw.txt"
     # opt_path = "/mnt/c/Users/chenyujie/Desktop/Test"
-    file = argv[1]
-    opt_path = argv[2]
+    # file = argv[1]
+    # opt_path = argv[2]
     _tmp, _opt = rename_out(file, opt_path)
     data = Data(_tmp)
     data.load(file)
     data.sort_and_block()
     data.printf(_opt)
-    remove_tmp(_tmp)
+    # remove_tmp(_tmp)
     print("************\nrun time = ", time()-st, 's\n************\n')
 
 
