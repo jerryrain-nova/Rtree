@@ -171,7 +171,7 @@ def main():
     dt = Data(_tmp)
     dt.load(file)
     dt.sort_and_block(_opt[0])
-
+    
 
 if __name__ == '__main__':
     main()

@@ -105,6 +105,7 @@ class Data:
         return gd, gd_b
 
     def write_tmp(self, tf, il):
+        st = time()
         with open(tf, 'w') as f:
             cache = ''
             for i in range(len(il)):
@@ -113,6 +114,7 @@ class Data:
                     print(cache, end='', file=f)
                     cache = ''
             print(cache, end='', file=f)
+        print(tf+" write_time = ", time()-st, 's')
 
     def cut_block(self, il):
         length = (len(il)-1)//256+1
@@ -155,16 +157,20 @@ class Data:
         del i, xr, r_s_i, xl_s, yl_c
         # print(u'当前进程的内存使用: %.4f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
 
+        print("write_st = ", time()-st, 's')
         yl = yl_r[s_i]
         self.write_tmp(ytf, yl)
         del yl_r, yl
+        print("x_st = ", time()-st, 's')
         xl = xl_r[s_i]
         self.write_tmp(xtf, xl)
         del xl_r, xl
+        print("v_st = ", time() - st, 's')
         vl_r = self.load_tmp(vtf, 8)
         vl = vl_r[s_i]
         self.write_tmp(vtf, vl)
         del vl_r, vl
+        print("g_st = ", time() - st, 's')
         gl_r = self.load_tmp(gtf, 32)
         gl = gl_r[s_i]
         self.write_tmp(gtf, gl)

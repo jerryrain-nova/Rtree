@@ -24,5 +24,5 @@ class test:
     def insert(self, l):
         self.data.append(l)
 
-a = [1, 2, 3]
-print(a[0:-1])
+a = 'abc'
+print(f'str {a}')
